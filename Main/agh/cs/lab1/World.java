@@ -8,5 +8,6 @@ public class World {
         zajonc.move(MoveDirection.RIGHT);
         zajonc.move(MoveDirection.FORWARD);
         System.out.println(zajonc.toString());
+        System.out.println("Test czy dziala");
     }
 }
