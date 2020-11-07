@@ -1,15 +1,16 @@
 package agh.cs.lab1;
 
 import org.junit.Test;
-/////////////////////////////////////////import static MoveDirection;
+
 import static org.junit.Assert.assertEquals;
 
 public class AnimalTest {
-    Animal cat = new Animal(new Vector2d(2, 2));
-    Animal dog = new Animal(new Vector2d(0, 0));
-    Animal goat = new Animal(new Vector2d(4, 4));
-    Animal duck = new Animal(new Vector2d(4, 0));
-    Animal cow = new Animal(new Vector2d(0, 4));
+    RectangularMap map = new RectangularMap(4, 4);
+    Animal cat = new Animal(map, new Vector2d(2, 2));
+    Animal dog = new Animal(map, new Vector2d(0, 0));
+    Animal goat = new Animal(map, new Vector2d(4, 4));
+    Animal duck = new Animal(map, new Vector2d(4, 0));
+    Animal cow = new Animal(map, new Vector2d(0, 4));
 
 
     MoveDirection f = MoveDirection.FORWARD;
@@ -17,8 +18,8 @@ public class AnimalTest {
     MoveDirection l = MoveDirection.LEFT;
     MoveDirection r = MoveDirection.RIGHT;
 
-@Test
-    public void orientationTest(){
+    @Test
+    public void orientationTest() {
         assertEquals(cat.getOrientation(), MapDirection.NORTH);
         cat.move(r);
         assertEquals(cat.getOrientation(), MapDirection.EAST);
@@ -29,8 +30,8 @@ public class AnimalTest {
         cat.move(r);
     }
 
-@Test
-    public void moveTest(){
+    @Test
+    public void moveTest() {
         cat.move(f);
         assertEquals(cat.getPosition(), new Vector2d(2, 3));
         cat.move(b);
@@ -70,7 +71,7 @@ public class AnimalTest {
         cow.move(l);
         cow.move(f);
         assertEquals(cow.getPosition(), new Vector2d(0, 3));
-}
+    }
 
 
 }

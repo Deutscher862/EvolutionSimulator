@@ -1,6 +1,7 @@
 package agh.cs.lab1;
 
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 
 public class MapDirectionTest {
@@ -10,7 +11,7 @@ public class MapDirectionTest {
     MapDirection W = MapDirection.WEST;
 
     @Test
-    public void nextTest(){
+    public void nextTest() {
         assertEquals(N.next(), E);
         assertEquals(E.next(), S);
         assertEquals(S.next(), W);
@@ -18,7 +19,7 @@ public class MapDirectionTest {
     }
 
     @Test
-    public void previousTest(){
+    public void previousTest() {
         assertEquals(N.previous(), W);
         assertEquals(E.previous(), N);
         assertEquals(S.previous(), E);

@@ -1,6 +1,7 @@
 package agh.cs.lab1;
 
 import org.junit.Test;
+
 import static org.junit.Assert.assertArrayEquals;
 
 public class OptionsParserTest {
@@ -15,7 +16,7 @@ public class OptionsParserTest {
     MoveDirection[] r3 = {MoveDirection.LEFT, MoveDirection.RIGHT, MoveDirection.LEFT};
 
     @Test
-    public void parseTest(){
+    public void parseTest() {
         assertArrayEquals(parser.parse(t1), r1);
         assertArrayEquals(parser.parse(t2), r2);
         assertArrayEquals(parser.parse(t3), r3);
