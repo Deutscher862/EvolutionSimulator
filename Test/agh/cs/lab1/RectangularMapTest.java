@@ -10,11 +10,10 @@ public class RectangularMapTest {
     RectangularMap defaultMap = new RectangularMap(4, 4);
     RectangularMap oneLineMap = new RectangularMap(0, 6);
 
-    String[] moves1 = {"f", "b", "r", "l"};
-    String[] moves2 = {"f", "f", "f", "r", "f"};
-
-    MoveDirection[] directions1 = new OptionsParser().parse(moves1);
-    MoveDirection[] directions2 = new OptionsParser().parse(moves2);
+    MoveDirection[] directions1 = {MoveDirection.FORWARD, MoveDirection.BACKWARD};
+    MoveDirection[] directions2 = {MoveDirection.RIGHT};
+    MoveDirection[] directions3 = {MoveDirection.LEFT};
+    MoveDirection[] directions4 = {MoveDirection.FORWARD};
 
     Vector2d v1 = new Vector2d(0, 0);
     Vector2d v2 = new Vector2d(2, 2);
@@ -70,7 +69,10 @@ public class RectangularMapTest {
 
         oneLineMap.place(a3);
         oneLineMap.run(directions2);
-        assertTrue(oneLineMap.isOccupied(new Vector2d(0, 5)));
+        assertTrue(oneLineMap.isOccupied(v3));
+        oneLineMap.run(directions3);
+        oneLineMap.run(directions4);
         assertFalse(oneLineMap.isOccupied(v3));
+        assertTrue(oneLineMap.isOccupied(new Vector2d(0, 3)));
     }
 }

@@ -14,8 +14,8 @@ public class RectangularMap implements IWorldMap {
         this.width = width;
         this.height = height;
         //tworzę tablice zwierząt, by zwracać zawartość danej pozycji w O(1), na początku zawiera tylko nulle
-        //z powodu powyższego założenia zwiększam wielkości o 1
-        this.mapOfAnimals = new Animal[width+1][height+1];
+        //z powodu powyższego założenia zwiększam szerokość i wysokość o 1
+        this.mapOfAnimals = new Animal[width + 1][height + 1];
     }
 
     public String toString() {
@@ -44,6 +44,7 @@ public class RectangularMap implements IWorldMap {
     @Override
     public void run(MoveDirection[] directions) {
         int index = 0;
+        //dla każdego ruchu zwierzę porusza się dokładnie raz
         for (MoveDirection direction : directions) {
             Vector2d lastPosition = animals.get(index).getPosition();
             Animal currentAnimal = animals.get(index);
@@ -56,14 +57,12 @@ public class RectangularMap implements IWorldMap {
                 mapOfAnimals[currentAnimal.getPosition().x][currentAnimal.getPosition().y] = currentAnimal;
             }
             index += 1;
-            //gdy wszystkie zwierzęta zostały sprawdzone zeruję indeks
-            if (index == animals.size()) index = 0;
         }
     }
 
     @Override
     public boolean isOccupied(Vector2d position) {
-        //w czasie O(1) zwracam prawdę jeśli w pole nie jest puste
+        //w czasie O(1) zwracam prawdę jeśli pole nie jest puste
         return this.mapOfAnimals[position.x][position.y] != null;
     }
 
