@@ -1,32 +1,33 @@
 package agh.cs.lab1;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class SimulationEngine implements IEngine {
-    public MoveDirection[] moves;
-    public IWorldMap map;
-    public int numberOfAnimals;
-    public MoveDirection[] shortListOfMoves;
+    private MoveDirection[] moves;
+    private IWorldMap map;
+    private ArrayList<Animal> listOfAnimals = new ArrayList<>();
 
-    public SimulationEngine(MoveDirection[] moves, IWorldMap map, Vector2d[] animalPositions) {
+    public SimulationEngine(MoveDirection[] moves, AbstractWorldMap map, Vector2d[] animalPositions) {
         this.moves = moves;
         this.map = map;
-        this.numberOfAnimals = animalPositions.length;
         for (Vector2d position : animalPositions) {
-            map.place(new Animal(this.map, position));
+            Animal a = new Animal(this.map, position);
+            this.map.place(a);
+            this.listOfAnimals.add(a);
+            a.addObserver(map);
         }
     }
 
     @Override
     public void run() {
-        // pętla for wykorzystuje mniejszą tablice MoveDirection[] o długości równej ilości zwierząt na mapie
-        // lub mniejszej, gdy jest mniej ruchów, a następnie przesyła je do metody run
-        for (int i = 0; i < this.moves.length; i += this.numberOfAnimals) {
-            if (i + numberOfAnimals <= this.moves.length)
-                this.shortListOfMoves = Arrays.copyOfRange(this.moves, i, i + this.numberOfAnimals);
-            else this.shortListOfMoves = Arrays.copyOfRange(this.moves, i, this.moves.length);
-
-            this.map.run(this.shortListOfMoves);
+        int index = 0;
+        for(MoveDirection direction : moves){
+            Animal currentAnimal = listOfAnimals.get(index);
+            currentAnimal.move(direction);
+            System.out.println(direction +" " +index);
+            System.out.println(this.map.toString());
+            index += 1;
+            if (index == listOfAnimals.size()) index =0;
         }
     }
 }

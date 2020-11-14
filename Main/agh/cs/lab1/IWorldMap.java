@@ -33,17 +33,7 @@ public interface IWorldMap {
      * @param directions
      *            Array of move directions.
      */
-    void run(MoveDirection[] directions);
 
-    /**
-     * Return true if given position on the map is occupied. Should not be
-     * confused with canMove since there might be empty positions where the animal
-     * cannot move.
-     *
-     * @param position
-     *            Position to check.
-     * @return True if the position is occupied.
-     */
     boolean isOccupied(Vector2d position);
 
     /**

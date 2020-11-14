@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class AnimalTest {
-    RectangularMap map = new RectangularMap(4, 4);
+    RectangularMap map = new RectangularMap(5, 5);
     Animal cat = new Animal(map, new Vector2d(2, 2));
     Animal dog = new Animal(map, new Vector2d(0, 0));
     Animal goat = new Animal(map, new Vector2d(4, 4));

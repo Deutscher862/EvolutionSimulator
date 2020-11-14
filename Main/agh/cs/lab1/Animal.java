@@ -1,14 +1,15 @@
 package agh.cs.lab1;
 
+import java.util.ArrayList;
+
 public class Animal {
     private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
-    private IWorldMap map;
-    private Vector2d BottomLeft = new Vector2d(0, 0);
-    private Vector2d TopRight = new Vector2d(4, 4);
+    private final IWorldMap map;
+    private ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
 
     public Animal(IWorldMap map) {
-        this.map = map;
+        this(map, new Vector2d(0, 0));
     }
 
     public Animal(IWorldMap map, Vector2d initialPosition) {
@@ -29,7 +30,7 @@ public class Animal {
     }
 
     public void move(MoveDirection direction) {
-        Vector2d checkBeforeMove;
+        Vector2d newPosition;
         switch (direction) {
             case RIGHT:
                 this.orientation = this.orientation.next();
@@ -39,15 +40,36 @@ public class Animal {
                 break;
             case FORWARD:
                 //tworzę nowy Vector2d o nowych współrzędnych, ponieważ takiego przekazania wymaga metoda canMoveTo
-                checkBeforeMove = this.position.add(this.orientation.toUnitVector());
-                if (map.canMoveTo(checkBeforeMove))
-                    this.position = checkBeforeMove;
+                newPosition = this.position.add(this.orientation.toUnitVector());
+                if (map.canMoveTo(newPosition)) {
+                    positionChanged(this.position, newPosition);
+                    this.position = newPosition;
+                }
                 break;
             case BACKWARD:
-                checkBeforeMove = this.position.add(this.orientation.toUnitVector().opposite());
-                if (map.canMoveTo(checkBeforeMove))
-                    this.position = checkBeforeMove;
+                newPosition = this.position.add(this.orientation.toUnitVector().opposite());
+                if (map.canMoveTo(newPosition)) {
+                    positionChanged(this.position, newPosition);
+                    this.position = newPosition;
+                }
                 break;
+        }
+    }
+
+    //dodałem hashMapę oraz obserwatorów, aby móc informować mapę o zmianie pozycji zwierzęcia
+
+    public void addObserver(IPositionChangeObserver observer){
+        this.observers.add(observer);
+    }
+
+    public void removeObserver(IPositionChangeObserver observer){
+        this.observers.remove(observer);
+    }
+
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition){
+        //wszyscy obserwatorzy zostają powiadomieni o zmianie
+        for(IPositionChangeObserver ob : this.observers){
+            ob.positionChanged(oldPosition, newPosition);
         }
     }
 }
