@@ -37,6 +37,7 @@ public class GrassField extends AbstractWorldMap{
         }
     }
 
+    @Override
     public String toString() {
         for (Animal a : listOfAnimals){
             //przeszukuję listę zwierząt szukając najdalszych pozycji, by podać ich x oraz y podczas wizualizacji mapy
@@ -46,6 +47,7 @@ public class GrassField extends AbstractWorldMap{
         return super.toString(this.lowerLeft, this.upperRight);
     }
 
+    @Override
     public boolean place(Animal animal) {
         if(super.place(animal)){
             // jeśli zwierzę zostało umieszczone na mapie dodaję je do listy
@@ -57,6 +59,7 @@ public class GrassField extends AbstractWorldMap{
         return false;
     }
 
+    @Override
     public Object objectAt(Vector2d position) {
         //zwrócenie zwierzęcia ma priorytet nad zwróceniem trawy
         if (super.objectAt(position) != null) return this.mapOfAnimals.get(position);
