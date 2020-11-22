@@ -15,7 +15,7 @@ public class RectangularMapTest {
 
     @Test
     public void isOccupiedTest() {
-        //nie sprawdzam wektorów o współrzędnych spoza mapy, ponieważ takie wektory nie zostaną przekazane do metody
+        assertFalse(defaultMap.isOccupied(new Vector2d(-1, -1)));
         assertFalse(defaultMap.isOccupied(v1));
         defaultMap.mapOfAnimals.put(v1, a1);
         assertTrue(defaultMap.isOccupied(v1));

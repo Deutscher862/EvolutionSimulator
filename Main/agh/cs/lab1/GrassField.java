@@ -8,10 +8,10 @@ import java.util.Random;
 public class GrassField extends AbstractWorldMap{
     private Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
     // wektory posiadające pozycję upperRight i lowerLeft od wszystkich obiektów
-    private Vector2d upperRight = super.lowerLeft;
-    private Vector2d lowerLeft = super.lowerLeft;
-    // z listy skorzystam podczas akutalizowania wektora the Farthest przed wizualizacją
-    private ArrayList<Animal> listOfAnimals = new ArrayList<>();
+    private Vector2d upperRight = new Vector2d(0, 0);
+    private Vector2d lowerLeft = this.upperRight;
+    // z listy skorzystam podczas akutalizowania wektora upperRight przed wizualizacją
+    private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
 
     public GrassField(int numberOfGrass){
         Random rand = new Random();
@@ -36,23 +36,34 @@ public class GrassField extends AbstractWorldMap{
             }
         }
     }
+    @Override
+    public Vector2d getLowerLeft(){
+        return this.lowerLeft;
+    }
 
     @Override
-    public String toString() {
-        for (Animal a : listOfAnimals){
-            //przeszukuję listę zwierząt szukając najdalszych pozycji, by podać ich x oraz y podczas wizualizacji mapy
-            this.upperRight = this.upperRight.upperRight(a.getPosition());
-            this.lowerLeft = this.lowerLeft.lowerLeft(a.getPosition());
-        }
-        return super.toString(this.lowerLeft, this.upperRight);
+    public Vector2d getUpperRight(){
+        return this.upperRight;
     }
+
+    @Override
+    public boolean canMoveTo(Vector2d position){
+        if (super.canMoveTo(position)){
+            this.upperRight = this.upperRight.upperRight(position);
+            this.lowerLeft = this.lowerLeft.lowerLeft(position);
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     public boolean place(Animal animal) {
         if(super.place(animal)){
             // jeśli zwierzę zostało umieszczone na mapie dodaję je do listy
-            this.upperRight = this.upperRight.upperRight(animal.getPosition());
-            this.lowerLeft = this.lowerLeft.lowerLeft(animal.getPosition());
+            Vector2d position = animal.getPosition();
+            this.upperRight = this.upperRight.upperRight(position);
+            this.lowerLeft = this.lowerLeft.lowerLeft(position);
             listOfAnimals.add(animal);
             return true;
         }
@@ -61,8 +72,8 @@ public class GrassField extends AbstractWorldMap{
 
     @Override
     public Object objectAt(Vector2d position) {
-        //zwrócenie zwierzęcia ma priorytet nad zwróceniem trawy
-        if (super.objectAt(position) != null) return this.mapOfAnimals.get(position);
+        Object result = super.objectAt(position);
+        if (result != null) return result;
         //jeśli na pozycji nie ma zwięrzęcia sprawdzam na niej obecność trawy
         else return this.mapOfGrass.get(position);
     }

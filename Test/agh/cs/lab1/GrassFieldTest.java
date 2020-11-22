@@ -65,8 +65,7 @@ public class GrassFieldTest {
 
     @Test
     public void objectAtTest() {
-        //nie sprawdzam wektorów o współrzędnych spoza mapy, ponieważ takie wektory nie zostaną przekazane do metody
-        assertEquals(defaultMap.objectAt(v1), null);
+        assertTrue(defaultMap.objectAt(v1) == null || defaultMap.objectAt(v1) instanceof Grass);
         defaultMap.mapOfAnimals.put(v1, a1);
         assertEquals(defaultMap.objectAt(v1), a1);
         defaultMap.mapOfAnimals.replace(v1, null);

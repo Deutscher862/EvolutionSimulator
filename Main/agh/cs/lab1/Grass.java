@@ -1,7 +1,7 @@
 package agh.cs.lab1;
 
 public class Grass {
-    private Vector2d position;
+    private final Vector2d position;
 
     public Grass(Vector2d grass){
         this.position = grass;
@@ -9,5 +9,9 @@ public class Grass {
 
     public String toString(){
         return "*";
+    }
+
+    public Vector2d getPosition() {
+        return position;
     }
 }

@@ -5,8 +5,7 @@ import java.util.Map;
 
 /* Dodanie interfejsu IMapElement na pewno byłoby pomocne, choć nie jest w tym projekcie aż tak wymagane. Natomiast w
 przypadku większej ilości klas mogących pojawić się na mapie, wprowadzenie takiego interfejsu byłoby wręcz wskazane.
-Pomogło by to ustandaryzować obiekty mogące  wystąpić na mapie, a także usprawniłoby to dodawanie kolejnych takich klas
-szczególnie, gdyby projekt robiony był w zespole.
+Pomogło by to ustandaryzować obiekty mogące  wystąpić na mapie, a także usprawniłoby to dodawanie kolejnych takich klas.
 
 Dodanie klasy AbstractWorldMapElement wydaje się być bezsensowny, ponieważ każda następna nowa klasa obiektu
 występującego na mapie różniłaby się zawartością metod. Dziedziczenie z klasy abstrakcyjnej niewiele by dało, ponieważ
@@ -14,13 +13,15 @@ metody (np. toString) i tak w większości musiałyby być implementowane oddzie
 */
 
 abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
-    protected Map<Vector2d,Animal> mapOfAnimals = new HashMap<>();
-    private MapVisualizer visualize = new MapVisualizer(this);
-    protected Vector2d lowerLeft = new Vector2d(0, 0);
-    protected Vector2d upperRight = new Vector2d(0, 0);
+    protected final Map<Vector2d,Animal> mapOfAnimals = new HashMap<>();
+    private final MapVisualizer visualize = new MapVisualizer(this);
 
-    public String toString(Vector2d lowerLeft, Vector2d upperRight){
-        return visualize.draw(lowerLeft, upperRight);
+    public abstract Vector2d getLowerLeft();
+
+    public abstract Vector2d getUpperRight();
+
+    public String toString(){
+        return visualize.draw(getLowerLeft(), getUpperRight());
     }
 
     @Override
@@ -35,6 +36,7 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
         Vector2d position = animal.getPosition();
         if (canMoveTo(position)) {
             this.mapOfAnimals.put(position, animal);
+            animal.addObserver(this);
             return true;
         }
         return false;
