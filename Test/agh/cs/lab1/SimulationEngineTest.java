@@ -11,7 +11,7 @@ public class SimulationEngineTest {
 
     String[] moves1 = {"f", "b", "r", "l", "f", "f", "r", "r", "f", "f", "f", "f", "f", "f", "f", "f"};
     String[] moves2 = {"f", "b", "f", "b", "r", "r", "l", "f", "l", "b", "f", "r", "b", "f", "f"};
-    String[] moves3 = {"f", "b", "r", "p", "f", "f", "l", "b"};
+    String[] moves3 = {"f", "b", "r", "f", "f", "l", "b"};
 
     OptionsParser parser = new OptionsParser();
     MoveDirection[] directions1 = parser.parse(moves1);

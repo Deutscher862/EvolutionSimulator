@@ -2,9 +2,7 @@ package agh.cs.lab1;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class RectangularMapTest {
     RectangularMap defaultMap = new RectangularMap(4, 4);
@@ -33,7 +31,6 @@ public class RectangularMapTest {
 
     @Test
     public void objectAtTest() {
-        //nie sprawdzam wektorów o współrzędnych spoza mapy, ponieważ takie wektory nie zostaną przekazane do metody
         assertEquals(defaultMap.objectAt(v1), null);
         defaultMap.mapOfAnimals.put(v1, a1);
         assertEquals(defaultMap.objectAt(v1), a1);
@@ -43,8 +40,8 @@ public class RectangularMapTest {
     @Test
     public void placeTest() {
         assertTrue(defaultMap.place(a1));
-        assertFalse(defaultMap.place(a1));
+        assertThrows(IllegalArgumentException.class, () -> defaultMap.place(a1));
         Animal a3 = new Animal(defaultMap, new Vector2d(-1, -1));
-        assertFalse(defaultMap.place(a3));
+        assertThrows(IllegalArgumentException.class, () -> defaultMap.place(a3));
     }
 }

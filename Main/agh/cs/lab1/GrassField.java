@@ -1,6 +1,5 @@
 package agh.cs.lab1;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -8,10 +7,6 @@ import java.util.Random;
 public class GrassField extends AbstractWorldMap{
     private Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
     // wektory posiadające pozycję upperRight i lowerLeft od wszystkich obiektów
-    private Vector2d upperRight = new Vector2d(0, 0);
-    private Vector2d lowerLeft = this.upperRight;
-    // z listy skorzystam podczas akutalizowania wektora upperRight przed wizualizacją
-    private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
 
     public GrassField(int numberOfGrass){
         Random rand = new Random();
@@ -30,44 +25,10 @@ public class GrassField extends AbstractWorldMap{
             //indeks zwiększa się tylko wtedy, gdy wylosowana pozycja nie jest już zajęta
             if (this.mapOfGrass.get(v) == null) {
                 this.mapOfGrass.put(v, grass);
-                this.upperRight = this.upperRight.upperRight(v);
-                this.lowerLeft = this.lowerLeft.lowerLeft(v);
+                this.mBoundary.addObject(grass);
                 index += 1;
             }
         }
-    }
-    @Override
-    public Vector2d getLowerLeft(){
-        return this.lowerLeft;
-    }
-
-    @Override
-    public Vector2d getUpperRight(){
-        return this.upperRight;
-    }
-
-    @Override
-    public boolean canMoveTo(Vector2d position){
-        if (super.canMoveTo(position)){
-            this.upperRight = this.upperRight.upperRight(position);
-            this.lowerLeft = this.lowerLeft.lowerLeft(position);
-            return true;
-        }
-        return false;
-    }
-
-
-    @Override
-    public boolean place(Animal animal) {
-        if(super.place(animal)){
-            // jeśli zwierzę zostało umieszczone na mapie dodaję je do listy
-            Vector2d position = animal.getPosition();
-            this.upperRight = this.upperRight.upperRight(position);
-            this.lowerLeft = this.lowerLeft.lowerLeft(position);
-            listOfAnimals.add(animal);
-            return true;
-        }
-        return false;
     }
 
     @Override

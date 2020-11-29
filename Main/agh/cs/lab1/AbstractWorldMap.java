@@ -12,16 +12,14 @@ występującego na mapie różniłaby się zawartością metod. Dziedziczenie z 
 metody (np. toString) i tak w większości musiałyby być implementowane oddzielnie klasach dziedziczących.
 */
 
-abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
+abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     protected final Map<Vector2d,Animal> mapOfAnimals = new HashMap<>();
     private final MapVisualizer visualize = new MapVisualizer(this);
-
-    public abstract Vector2d getLowerLeft();
-
-    public abstract Vector2d getUpperRight();
+    protected final MapBoundary mBoundary = new MapBoundary();
 
     public String toString(){
-        return visualize.draw(getLowerLeft(), getUpperRight());
+        System.out.println(this.mBoundary.getLowerLeft().toString() + this.mBoundary.getUpperRight().toString());
+        return visualize.draw(this.mBoundary.getLowerLeft(), this.mBoundary.getUpperRight());
     }
 
     @Override
@@ -32,14 +30,16 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver{
     }
 
     @Override
-    public boolean place(Animal animal) {
+    public boolean place(Animal animal) throws IllegalArgumentException {
         Vector2d position = animal.getPosition();
-        if (canMoveTo(position)) {
-            this.mapOfAnimals.put(position, animal);
-            animal.addObserver(this);
-            return true;
-        }
-        return false;
+            if (canMoveTo(position)) {
+                this.mapOfAnimals.put(position, animal);
+                animal.addObserver(this);
+                animal.addObserver(this.mBoundary);
+                this.mBoundary.addObject(animal);
+            }
+            else throw new IllegalArgumentException("Animal couldn't be placed at position " + position.toString());
+        return true;
     }
 
     @Override

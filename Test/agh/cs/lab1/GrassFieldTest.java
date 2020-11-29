@@ -2,9 +2,7 @@ package agh.cs.lab1;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class GrassFieldTest {
     GrassField defaultMap = new GrassField(10);
@@ -74,7 +72,7 @@ public class GrassFieldTest {
     @Test
     public void placeTest() {
         assertTrue(defaultMap.place(a1));
-        assertFalse(defaultMap.place(a1));
+        assertThrows(IllegalArgumentException.class, () -> defaultMap.place(a1));
         Animal a3 = new Animal(defaultMap, new Vector2d(-1, -1));
         assertTrue(defaultMap.place(a3));
     }

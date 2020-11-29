@@ -6,7 +6,7 @@ public class Animal {
     private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
     private final IWorldMap map;
-    private final ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
+    private ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
 
     public Animal(IWorldMap map) {
         this(map, new Vector2d(0, 0));
@@ -15,6 +15,7 @@ public class Animal {
     public Animal(IWorldMap map, Vector2d initialPosition) {
         this.map = map;
         this.position = initialPosition;
+
     }
 
     public MapDirection getOrientation() {
@@ -30,6 +31,7 @@ public class Animal {
     }
 
     public void move(MoveDirection direction) {
+        Vector2d oldPosition;
         Vector2d newPosition;
         switch (direction) {
             case RIGHT:
@@ -42,15 +44,17 @@ public class Animal {
                 //tworzę nowy Vector2d o nowych współrzędnych, ponieważ takiego przekazania wymaga metoda canMoveTo
                 newPosition = this.position.add(this.orientation.toUnitVector());
                 if (map.canMoveTo(newPosition)) {
-                    positionChanged(this.position, newPosition);
+                    oldPosition = this.position;
                     this.position = newPosition;
+                    informObservers(oldPosition, newPosition);
                 }
                 break;
             case BACKWARD:
                 newPosition = this.position.add(this.orientation.toUnitVector().opposite());
                 if (map.canMoveTo(newPosition)) {
-                    positionChanged(this.position, newPosition);
+                    oldPosition = this.position;
                     this.position = newPosition;
+                    informObservers(oldPosition, newPosition);
                 }
                 break;
         }
@@ -64,7 +68,7 @@ public class Animal {
         this.observers.remove(observer);
     }
 
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition){
+    private void informObservers(Vector2d oldPosition, Vector2d newPosition){
         //wszyscy obserwatorzy zostają powiadomieni o zmianie
         for(IPositionChangeObserver ob : this.observers){
             ob.positionChanged(oldPosition, newPosition);

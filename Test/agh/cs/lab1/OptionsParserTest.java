@@ -3,13 +3,15 @@ package agh.cs.lab1;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThrows;
 
 public class OptionsParserTest {
     OptionsParser parser = new OptionsParser();
 
-    String[] t1 = {"f", "forward", "not_a_direction"};
+    String[] t1 = {"f", "forward"};
     String[] t2 = {"b", "b", "not_a_direction", "backward"};
-    String[] t3 = {"1234", "l", "right", "left", "c:"};
+    String[] t3 = {"1234", "l", "right", "left"};
+    String[] t4 = {"l", "right", "left"};
 
     MoveDirection[] r1 = {MoveDirection.FORWARD, MoveDirection.FORWARD};
     MoveDirection[] r2 = {MoveDirection.BACKWARD, MoveDirection.BACKWARD, MoveDirection.BACKWARD};
@@ -18,8 +20,9 @@ public class OptionsParserTest {
     @Test
     public void parseTest() {
         assertArrayEquals(parser.parse(t1), r1);
-        assertArrayEquals(parser.parse(t2), r2);
-        assertArrayEquals(parser.parse(t3), r3);
+        assertThrows(IllegalArgumentException.class, () -> parser.parse(t2));
+        assertThrows(IllegalArgumentException.class, () -> parser.parse(t3));
+        assertArrayEquals(parser.parse(t4), r3);
     }
 
 }
