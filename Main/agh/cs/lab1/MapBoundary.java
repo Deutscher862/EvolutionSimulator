@@ -33,7 +33,7 @@ public class MapBoundary implements IPositionChangeObserver {
             else return 1;
     }
 
-    public Vector2d getObjectPosition(Object object){
+    private Vector2d getObjectPosition(Object object){
         if (object instanceof Animal)
             return ((Animal) object).getPosition();
         else return ((Grass) object).getPosition();
