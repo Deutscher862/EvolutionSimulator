@@ -6,7 +6,7 @@ public class Animal {
     private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
     private final IWorldMap map;
-    private ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
+    private final ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
 
     public Animal(IWorldMap map) {
         this(map, new Vector2d(0, 0));
