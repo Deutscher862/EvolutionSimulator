@@ -5,8 +5,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class GrassField extends AbstractWorldMap{
-    private Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
-    // wektory posiadające pozycję upperRight i lowerLeft od wszystkich obiektów
+    private final Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
 
     public GrassField(int numberOfGrass){
         Random rand = new Random();

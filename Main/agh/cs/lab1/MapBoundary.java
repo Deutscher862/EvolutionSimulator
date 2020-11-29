@@ -40,13 +40,13 @@ public class MapBoundary implements IPositionChangeObserver {
     }
 
     public Vector2d getLowerLeft(){
-        if (xAxisSet.isEmpty()) return new Vector2d(0, 0);
-        return getObjectPosition(xAxisSet.first()).lowerLeft(getObjectPosition(yAxisSet.first()));
+        if (this.xAxisSet.isEmpty()) return new Vector2d(0, 0);
+        return getObjectPosition(this.xAxisSet.first()).lowerLeft(getObjectPosition(this.yAxisSet.first()));
     }
 
     public Vector2d getUpperRight(){
-        if (xAxisSet.isEmpty()) return new Vector2d(0, 0);
-        return getObjectPosition(xAxisSet.last()).upperRight(getObjectPosition(yAxisSet.last()));
+        if (this.xAxisSet.isEmpty()) return new Vector2d(0, 0);
+        return getObjectPosition(this.xAxisSet.last()).upperRight(getObjectPosition(this.yAxisSet.last()));
     }
 
     public void addObject(Object object){
@@ -70,8 +70,8 @@ public class MapBoundary implements IPositionChangeObserver {
 
     @Override
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {
-        setNewPosition(xAxisSet, newPosition);
-        setNewPosition(yAxisSet, newPosition);
+        setNewPosition(this.xAxisSet, newPosition);
+        setNewPosition(this.yAxisSet, newPosition);
     }
 
 }
