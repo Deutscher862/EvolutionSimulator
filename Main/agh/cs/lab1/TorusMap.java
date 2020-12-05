@@ -2,8 +2,18 @@ package agh.cs.lab1;
 
 import java.util.*;
 
-public class TorusMap implements IWorldMap {
+/*
+W konstruktorze pojawia się pierwsza trawa
+Następuje pętla, a w niej:
+1.Wszystkie zwierzęta ruszają się i tracą energię
+2.Następuje przejście po całej mapie:
+    - sprawdzenie czy jakaś trawa i zwierzę jest na jednym polu - jeśli tak to trawa jest usuwana z hashmapy i zwierze odzyskuje energię
+    - sprawdzenie czy jakieś zwierzę umarło - jest usuwane z listy i hashmapy
+    - sprawdzenie czy kilka zwierząt nie stoi na jednej pozycji i czy mogą się rozmnażać - następuje stworzenie nowego zwierzęta
+3. Rośnie nowa trawa
+ */
 
+public class TorusMap implements IWorldMap {
     private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
     private final Comparator<Animal> comparator = new EnergyCompare();
     protected final Map<Vector2d, List<Animal>> mapOfAnimals = new HashMap<>();
@@ -14,29 +24,29 @@ public class TorusMap implements IWorldMap {
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
     private final Vector2d jungleUpperRight;
-    private final int width;
-    private final int height;
 
-    public TorusMap(int width, int height, int numberOfGrass, int grassEnergy, float jungleRatio){
-        this.width = width;
-        this.height = height;
-        this.upperRight = new Vector2d(width, height);
+    public TorusMap(Vector2d upperRight, int numberOfGrass, int grassEnergy, float jungleRatio){
+        this.upperRight = upperRight;
         this.grassEnergy = grassEnergy;
-        this.jungleLowerLeft = new Vector2d(Math.round(jungleRatio*this.width), Math.round(jungleRatio*this.height));
-        this.jungleUpperRight = new Vector2d(Math.round(this.width - this.width*jungleRatio), Math.round(this.height - this.height*jungleRatio));
+        this.jungleLowerLeft = new Vector2d(Math.round(jungleRatio*this.upperRight.x), Math.round(jungleRatio*this.upperRight.y));
+        this.jungleUpperRight = new Vector2d(Math.round(this.upperRight.x - this.upperRight.x*jungleRatio), Math.round(this.upperRight.y - this.upperRight.y*jungleRatio));
 
         for (int i = 0; i < numberOfGrass/2; i++){
             growGrass();
         }
     }
 
-    public int getWidth() { return width; }
+    public Vector2d getUpperRight() {
+        return upperRight;
+    }
 
-    public int getHeight() { return height; }
+    public Vector2d getLowerLeft() {
+        return lowerLeft;
+    }
 
     @Override
     public boolean canMoveTo(Vector2d position) {
-        return false;
+        return position.follows(this.lowerLeft) && position.precedes(this.upperRight);
     }
 
     @Override
@@ -44,8 +54,9 @@ public class TorusMap implements IWorldMap {
         if (!isOccupied(animal.getPosition())){
             List<Animal> list = new ArrayList<>();
             list.add(animal);
-            list.sort(comparator);
+            //list.sort(comparator);
             mapOfAnimals.put(animal.getPosition(), list);
+            listOfAnimals.add(animal);
             return true;
         }
         return false;
