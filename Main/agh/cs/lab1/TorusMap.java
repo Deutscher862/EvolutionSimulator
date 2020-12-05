@@ -10,7 +10,6 @@ public class TorusMap implements IWorldMap {
     private final Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
     private final MapVisualizer visualize = new MapVisualizer(this);
     private final int grassEnergy;
-    // te liczby pilnują, czy można dodać trawę
     private final Vector2d lowerLeft = new Vector2d(0, 0);
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
