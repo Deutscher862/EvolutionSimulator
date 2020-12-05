@@ -1,8 +1,11 @@
 package agh.cs.lab1;
 
+import java.util.Random;
+
 public class Vector2d {
     final public int x;
     final public int y;
+    private final Random rand  = new Random();
 
     public Vector2d(int x, int y) {
         this.x = x;
@@ -56,5 +59,9 @@ public class Vector2d {
 
     public Vector2d opposite() {
         return new Vector2d(-this.x, -this.y);
+    }
+
+    public Vector2d randomVector(Vector2d other){
+        return new Vector2d(rand.nextInt(other.x-this.x + 1) + this.x, rand.nextInt(other.y-this.y + 1) + this.y);
     }
 }
