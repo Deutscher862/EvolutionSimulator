@@ -20,7 +20,7 @@ public class GrassField extends AbstractWorldMap{
             random_x = rand.nextInt(max);
             random_y = rand.nextInt(max);
             v = new Vector2d(random_x, random_y);
-            grass = new Grass(v);
+            grass = new Grass(v, 5);
             //indeks zwiększa się tylko wtedy, gdy wylosowana pozycja nie jest już zajęta
             if (this.mapOfGrass.get(v) == null) {
                 this.mapOfGrass.put(v, grass);

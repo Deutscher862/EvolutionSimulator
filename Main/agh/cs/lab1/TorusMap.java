@@ -14,6 +14,7 @@ Następuje pętla, a w niej:
  */
 
 public class TorusMap implements IWorldMap, IPositionChangeObserver {
+    private final Random rand  = new Random();
     private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
     private final Comparator<Animal> comparator = new EnergyCompare();
     protected final Map<Vector2d, List<Animal>> mapOfAnimals = new HashMap<>();
@@ -24,13 +25,16 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
     private final Vector2d jungleUpperRight;
+    private int numberOfAnimals = 0;
+    private int numberOfGrass = 0;
+    private int freeSpace;
 
     public TorusMap(Vector2d upperRight, int numberOfGrass, int grassEnergy, float jungleRatio){
         this.upperRight = upperRight;
         this.grassEnergy = grassEnergy;
         this.jungleLowerLeft = new Vector2d(Math.round(jungleRatio*this.upperRight.x), Math.round(jungleRatio*this.upperRight.y));
         this.jungleUpperRight = new Vector2d(Math.round(this.upperRight.x - this.upperRight.x*jungleRatio), Math.round(this.upperRight.y - this.upperRight.y*jungleRatio));
-
+        this.freeSpace = (this.upperRight.x+1)*(this.upperRight.y+1);
        /*for (int i = 0; i < numberOfGrass/2; i++){
             growGrass();
         }*/
@@ -49,9 +53,25 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     }
 
     public void move(){
+        if (listOfAnimals.size() == 0) return;
+        //wszystkie zwierzęta się ruszają
         for(Animal animal : listOfAnimals){
             animal.move();
         }
+        //przejście po całej mapie
+        Vector2d checkingPosition;
+        for(int i = 0; i < this.upperRight.x; i++){
+            for(int j = 0; j < this.upperRight.y; j++){
+                checkingPosition = new Vector2d(i, j);
+                if(objectAt(checkingPosition) instanceof Animal){
+                    List<Animal> list = this.mapOfAnimals.get(checkingPosition);
+                    if(this.mapOfGrass.get(checkingPosition) != null) grassEating(checkingPosition);
+                    if(list.size() > 1) reproduce(list);
+                    if(list.get(list.size()-1).getEnergy() <= 0) removeDeadAnimals(checkingPosition);
+                }
+            }
+        }
+
     }
 
     @Override
@@ -67,6 +87,8 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             list.add(animal);
             mapOfAnimals.put(animal.getPosition(), list);
             listOfAnimals.add(animal);
+            this.numberOfAnimals += 1;
+            this.freeSpace -= 1;
             System.out.println("Dodane na" + list.get(0).toString());
             System.out.println(list.get(0).getPosition().toString());
             return true;
@@ -94,7 +116,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         /*while(){
 
         }*/
-        newGrass = new Grass(newPosition);
+        newGrass = new Grass(newPosition, this.grassEnergy);
         this.mapOfGrass.put(newPosition, newGrass);
 
         newPosition = this.jungleLowerLeft.randomVector(this.jungleUpperRight);
@@ -102,9 +124,65 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         /*while(){
 
         }*/
-        newGrass = new Grass(newPosition);
+        newGrass = new Grass(newPosition, this.grassEnergy);
         this.mapOfGrass.put(newPosition, newGrass);
 
+    }
+
+    private void grassEating(Vector2d position){
+        //gdy na polu z trawą pojawią się zwierzę
+        Grass grass = mapOfGrass.get(position);
+        List<Animal> list = this.mapOfAnimals.get(position);
+        Animal strongestAnimal = list.get(0);
+        //counter liczy ilość zwierząt które zjedzą trawę
+        int sameEnergyCounter = 1;
+        while(sameEnergyCounter < list.size() && list.get(sameEnergyCounter).getEnergy() == strongestAnimal.getEnergy())
+            sameEnergyCounter += 1;
+        // następnie wszystkie zwięrzęta o tej samej energii dzielą się rośliną
+        for(int i = 0; i < sameEnergyCounter; i++){
+            list.get(i).eat(grass.getEnergy()/sameEnergyCounter);
+        }
+        //trawa znika z mapy
+        numberOfGrass -= 1;
+        this.freeSpace += 1;
+        mapOfGrass.replace(position, null);
+    }
+
+    private void reproduce(List<Animal> list){
+        Animal strongerParent = list.get(0);
+        Animal weakerParent = list.get(1);
+        //sprawdzam czy zwierzęta mają wystarczająco dużo energii do rozmnażania
+        if(strongerParent.getEnergy() > strongerParent.getMaxEnergy()/4 && weakerParent.getEnergy() > weakerParent.getMaxEnergy()/4 ){
+            //szukam czy dookoła rodziców jest jakieś wolne pole
+            ArrayList<Vector2d> freeSpace = new ArrayList<>();
+            Vector2d nearestPosition;
+            MapDirection lookForFreeSpace = strongerParent.getOrientation();
+            for (int i = 0; i < 8; i++){
+                nearestPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(getUpperRight());
+                if(!isOccupied(nearestPosition)){
+                    freeSpace.add(nearestPosition);
+                }
+                lookForFreeSpace = lookForFreeSpace.next();
+            }
+            //jeśli istnieje jakieś puste miejsce, to je losuję i dodaję do metody reproduce
+            if(freeSpace.size() > 0){
+                Animal child = strongerParent.reproduce(weakerParent, freeSpace.get(rand.nextInt(freeSpace.size())));
+                this.place(child);
+            }
+        }
+    }
+
+    private void removeDeadAnimals(Vector2d position) {
+        List<Animal> list = this.mapOfAnimals.get(position);
+        while(list.size() > 0 && list.get(list.size()-1).getEnergy() <= 0){
+            Animal deadAnimal = list.get(list.size()-1);
+            this.listOfAnimals.remove(deadAnimal);
+            this.numberOfAnimals -= 1;
+            this.freeSpace += 1;
+            list.remove(deadAnimal);
+            System.out.println("umarło :c");
+        }
+        if (list.size() == 0) this.mapOfAnimals.replace(position, null);
     }
 
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animalToMove) {
