@@ -11,21 +11,24 @@ public class Animal {
     private final Genotype genes;
     protected int Energy;
     private int moveEnergy;
+    private final int number;
 
     //konstruktor dla zwierząt stworzonych podczas rozmnażania
     public Animal(TorusMap map, Animal strongerParent, Animal weakerParent, Vector2d upperRight) {
         this.map = map;
+        this.number = 0;
         this.genes = new Genotype(strongerParent.getGenes(), weakerParent.getGenes());
         this.Energy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
         this.moveEnergy = strongerParent.getMoveEnergy();
     }
 
     //konstruktor dla pierwszych zwierząt na mapie, bez rodziców
-    public Animal(TorusMap map, int startEnergy, int moveEnergy) {
+    public Animal(TorusMap map, int startEnergy, int moveEnergy, int number) {
         this.map = map;
         this.genes = new Genotype();
         this.Energy = startEnergy;
         this.moveEnergy = moveEnergy;
+        this.number = number;
         this.position = this.map.getLowerLeft().randomVector(this.map.getUpperRight());
         int rotate = this.genes.randomDirection();
         for (int i = 0; i < rotate; i++){
@@ -40,10 +43,9 @@ public class Animal {
     public Vector2d getPosition() {
         return this.position;
     }
-
-    public String toString() {
-        return this.orientation.toString();
-    }
+//this.orientation.toString()
+    //String.valueOf(this.number);
+    public String toString() { return this.orientation.toString(); }
 
     public Genotype getGenes() {
         return this.genes;
@@ -66,18 +68,18 @@ public class Animal {
         // w przeciwnym wypadku zwierzę musi pojawić się na drugiej stronie mapy
         else {
             Vector2d max = this.map.getUpperRight();
-            if (this.position.x < 0) {
-                if (this.position.y < 0) this.position = max;
-                else if( this.position.y > max.y) this.position = new Vector2d(max.x,0 );
-                else this.position = new Vector2d(max.x ,this.position.y);
+            if (newPosition.x < 0) {
+                if (newPosition.y < 0) this.position = max;
+                else if( newPosition.y > max.y) this.position = new Vector2d(max.x,0 );
+                else this.position = new Vector2d(max.x ,newPosition.y);
             }
-            else if (this.position.x > max.x){
-                if (this.position.y < 0) this.position = new Vector2d(0, max.y);
-                else if(this.position.y > max.y) this.position = this.map.getLowerLeft();
-                else this.position = new Vector2d(0, this.position.y);
+            else if (newPosition.x > max.x){
+                if (newPosition.y < 0) this.position = new Vector2d(0, max.y);
+                else if(newPosition.y > max.y) this.position = this.map.getLowerLeft();
+                else this.position = new Vector2d(0, newPosition.y);
             }
-            else if (this.position.y < 0) this.position = new Vector2d(this.position.x, max.y);
-            else this.position = new Vector2d(this.position.x, 0);
+            else if (newPosition.y < 0) this.position = new Vector2d(newPosition.x, max.y);
+            else this.position = new Vector2d(newPosition.x, 0);
         }
 
         this.Energy -= this.moveEnergy;
@@ -106,4 +108,7 @@ public class Animal {
         }
     }
 
+    public void generateNewPosition() {
+        this.position = this.map.getLowerLeft().randomVector(this.map.getUpperRight());
+    }
 }

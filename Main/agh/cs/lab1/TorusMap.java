@@ -49,7 +49,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     }
 
     public void move(){
-        System.out.println(toString());
         for(Animal animal : listOfAnimals){
             animal.move();
         }
@@ -132,7 +131,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             List<Animal> newPositionList = this.mapOfAnimals.get(newPosition);
             newPositionList.add(animalToMove);
             newPositionList.sort(comparator);
-
         }
     }
 }
