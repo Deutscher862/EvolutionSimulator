@@ -13,7 +13,6 @@ public class Genotype {
             this.genes[i] = rand.nextInt(8);
             this.directions[this.genes[i]] += 1;
         }
-        System.out.println(Arrays.toString(this.directions));
         validate();
     }
 

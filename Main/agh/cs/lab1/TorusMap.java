@@ -8,8 +8,8 @@ Następuje pętla, a w niej:
 1.Wszystkie zwierzęta ruszają się i tracą energię
 2.Następuje przejście po całej mapie:
     - sprawdzenie czy jakaś trawa i zwierzę jest na jednym polu - jeśli tak to trawa jest usuwana z hashmapy i zwierze odzyskuje energię
-    - sprawdzenie czy jakieś zwierzę umarło - jest usuwane z listy i hashmapy
     - sprawdzenie czy kilka zwierząt nie stoi na jednej pozycji i czy mogą się rozmnażać - następuje stworzenie nowego zwierzęta
+    - sprawdzenie czy jakieś zwierzę umarło - jest usuwane z listy i hashmapy
 3. Rośnie nowa trawa
  */
 
@@ -27,17 +27,19 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     private final Vector2d jungleUpperRight;
     private int numberOfAnimals = 0;
     private int numberOfGrass = 0;
-    private int freeSpace;
+    private int jungleFreeSpace;
+    private int savannahFreeSpace;
 
     public TorusMap(Vector2d upperRight, int numberOfGrass, int grassEnergy, float jungleRatio){
         this.upperRight = upperRight;
         this.grassEnergy = grassEnergy;
         this.jungleLowerLeft = new Vector2d(Math.round(jungleRatio*this.upperRight.x), Math.round(jungleRatio*this.upperRight.y));
         this.jungleUpperRight = new Vector2d(Math.round(this.upperRight.x - this.upperRight.x*jungleRatio), Math.round(this.upperRight.y - this.upperRight.y*jungleRatio));
-        this.freeSpace = (this.upperRight.x+1)*(this.upperRight.y+1);
-       /*for (int i = 0; i < numberOfGrass/2; i++){
+        this.jungleFreeSpace = (this.jungleUpperRight.x-this.jungleLowerLeft.x+1)*(this.jungleUpperRight.y-this.jungleLowerLeft.y+1);
+        this.savannahFreeSpace = (this.upperRight.x+1)*(this.upperRight.y+1) - this.jungleFreeSpace;
+        for (int i = 0; i < numberOfGrass/2; i++){
             growGrass();
-        }*/
+        }
     }
 
     public Vector2d getUpperRight() {
@@ -53,11 +55,12 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     }
 
     public void move(){
-        if (listOfAnimals.size() == 0) return;
+        //if (listOfAnimals.size() == 0) return;
         //wszystkie zwierzęta się ruszają
         for(Animal animal : listOfAnimals){
             animal.move();
         }
+        System.out.println(this.jungleFreeSpace + " " + this.savannahFreeSpace);
         //przejście po całej mapie
         Vector2d checkingPosition;
         for(int i = 0; i < this.upperRight.x; i++){
@@ -71,7 +74,13 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
                 }
             }
         }
+        growGrass();
 
+    }
+
+    //zwraca true, jeśli podany wektor jest w dżungli
+    public boolean inJungle(Vector2d position){
+        return position.precedes(this.jungleUpperRight) && position.follows(this.jungleLowerLeft);
     }
 
     @Override
@@ -88,9 +97,8 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             mapOfAnimals.put(animal.getPosition(), list);
             listOfAnimals.add(animal);
             this.numberOfAnimals += 1;
-            this.freeSpace -= 1;
-            System.out.println("Dodane na" + list.get(0).toString());
-            System.out.println(list.get(0).getPosition().toString());
+            if(inJungle(animal.getPosition())) this.jungleFreeSpace -= 1;
+                else this.savannahFreeSpace -= 1;
             return true;
         }
         return false;
@@ -110,22 +118,25 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
 
     private void growGrass(){
         Vector2d newPosition = this.lowerLeft.randomVector(this.upperRight);
-        Grass newGrass;
-        int placed = 0;
-        // poza dżunglą
-        /*while(){
-
-        }*/
-        newGrass = new Grass(newPosition, this.grassEnergy);
-        this.mapOfGrass.put(newPosition, newGrass);
+        if(savannahFreeSpace > 0){
+           while(inJungle(newPosition) || isOccupied(newPosition)){
+               newPosition = this.lowerLeft.randomVector(this.upperRight);
+           }
+            Grass newGrass = new Grass(newPosition, this.grassEnergy);
+            this.mapOfGrass.put(newPosition, newGrass);
+            this.savannahFreeSpace -= 1;
+        }
 
         newPosition = this.jungleLowerLeft.randomVector(this.jungleUpperRight);
         // w dżungli
-        /*while(){
-
-        }*/
-        newGrass = new Grass(newPosition, this.grassEnergy);
-        this.mapOfGrass.put(newPosition, newGrass);
+        if(jungleFreeSpace > 0){
+            while(isOccupied(newPosition)){
+                newPosition = this.jungleLowerLeft.randomVector(this.jungleUpperRight);
+            }
+            Grass newGrass = new Grass(newPosition, this.grassEnergy);
+            this.mapOfGrass.put(newPosition, newGrass);
+            this.jungleFreeSpace -= 1;
+        }
 
     }
 
@@ -144,7 +155,8 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         }
         //trawa znika z mapy
         numberOfGrass -= 1;
-        this.freeSpace += 1;
+        if(inJungle(grass.getPosition())) this.jungleFreeSpace -= 1;
+        else this.savannahFreeSpace -= 1;
         mapOfGrass.replace(position, null);
     }
 
@@ -174,11 +186,16 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
 
     private void removeDeadAnimals(Vector2d position) {
         List<Animal> list = this.mapOfAnimals.get(position);
+        //lista jest posortowana, więc usuwam ostatni element dopóki są tam martwe zwierzęta
         while(list.size() > 0 && list.get(list.size()-1).getEnergy() <= 0){
             Animal deadAnimal = list.get(list.size()-1);
+
+            if(inJungle(deadAnimal.getPosition())) this.jungleFreeSpace += 1;
+            else this.savannahFreeSpace += 1;
+
             this.listOfAnimals.remove(deadAnimal);
             this.numberOfAnimals -= 1;
-            this.freeSpace += 1;
+
             list.remove(deadAnimal);
             System.out.println("umarło :c");
         }

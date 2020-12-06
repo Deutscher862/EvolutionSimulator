@@ -47,8 +47,7 @@ public class Animal {
     public Vector2d getPosition() {
         return this.position;
     }
-//this.orientation.toString()
-    //String.valueOf(this.number);
+
     public String toString() { return this.orientation.toString(); }
 
     public Genotype getGenes() {
@@ -77,6 +76,7 @@ public class Animal {
 
     public void eat(int grassEnergy){
         this.energy += grassEnergy;
+        if (this.energy > this.maxEnergy) this.energy = this.maxEnergy;
     }
 
     public Animal reproduce(Animal secondParent, Vector2d childPosition){

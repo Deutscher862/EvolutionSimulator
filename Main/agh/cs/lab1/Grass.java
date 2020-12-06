@@ -14,7 +14,7 @@ public class Grass {
     }
 
     public Vector2d getPosition() {
-        return position;
+        return this.position;
     }
 
     public int getEnergy() {
