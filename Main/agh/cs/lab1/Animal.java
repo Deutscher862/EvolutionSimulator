@@ -3,7 +3,7 @@ package agh.cs.lab1;
 import java.util.ArrayList;
 
 public class Animal {
-    private MapDirection orientation;
+    private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
     private final TorusMap map;
     private final ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
@@ -26,6 +26,11 @@ public class Animal {
         this.genes = new Genotype();
         this.Energy = startEnergy;
         this.moveEnergy = moveEnergy;
+        this.position = this.map.getLowerLeft().randomVector(this.map.getUpperRight());
+        int rotate = this.genes.randomDirection();
+        for (int i = 0; i < rotate; i++){
+            this.orientation = this.orientation.next();
+        }
     }
 
     public MapDirection getOrientation() {
@@ -48,7 +53,7 @@ public class Animal {
 
     public int getMoveEnergy() { return moveEnergy; }
 
-    public void move(MoveDirection direction) {
+    public void move() {
         int rotate = this.genes.randomDirection();
         for (int i = 0; i < rotate; i++){
             this.orientation = this.orientation.next();
@@ -97,7 +102,8 @@ public class Animal {
     private void informObservers(Vector2d oldPosition, Vector2d newPosition){
         //wszyscy obserwatorzy zostają powiadomieni o zmianie
         for(IPositionChangeObserver ob : this.observers){
-            ob.positionChanged(oldPosition, newPosition);
+            ob.positionChanged(oldPosition, newPosition, this);
         }
     }
+
 }

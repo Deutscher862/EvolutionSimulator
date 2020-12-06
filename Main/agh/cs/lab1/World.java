@@ -4,13 +4,17 @@ public class World {
 
     public static void main(String[] args) {
         try {
-            Genotype g = new Genotype();
-            Genotype b = new Genotype();
-            Genotype z = new Genotype(g, b);
-            System.out.println(g.toString());
-            System.out.println(b.toString());
-            System.out.println(z.toString());
+            int numberOfAnimals = 2;
+            int startEnergy = 30;
+            int moveEnergy = 1;
+            int grassEnergy  =4;
+            Vector2d upperRight = new Vector2d(5, 5);
+            int numberOfGrass = 10;
+            float jungleRatio = 0.3f;
+            int ages = 10;
+            SimulationEngine engine = new SimulationEngine(numberOfAnimals, startEnergy, moveEnergy, grassEnergy, upperRight, numberOfGrass, jungleRatio, ages);
 
+            engine.run();
         } catch (Exception e) {
             System.out.println("Program forced to stop due to exceptions");
             e.printStackTrace();

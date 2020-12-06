@@ -53,7 +53,7 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     }
 
     @Override
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animal) {
         Animal a = this.mapOfAnimals.get(oldPosition);
         this.mapOfAnimals.replace(oldPosition, null);
         this.mapOfAnimals.put(newPosition, a);

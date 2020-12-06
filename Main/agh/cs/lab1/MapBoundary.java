@@ -69,7 +69,7 @@ public class MapBoundary implements IPositionChangeObserver {
     }
 
     @Override
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animal) {
         setNewPosition(this.xAxisSet, newPosition);
         setNewPosition(this.yAxisSet, newPosition);
     }
