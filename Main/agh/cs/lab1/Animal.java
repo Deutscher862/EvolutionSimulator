@@ -9,30 +9,27 @@ public class Animal {
     private final ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
     private final ArrayList<Vector2d> positionHistory = new ArrayList<>();
     private final Genotype genes;
-    private final int maxEnergy;
+    private final int startEnergy;
     public int energy;
     private final int moveEnergy;
-    private final int number;
 
     //konstruktor dla zwierząt stworzonych podczas rozmnażania
     public Animal(TorusMap map, Animal strongerParent, Animal weakerParent, Vector2d position) {
         this.map = map;
-        this.number = 0;
         this.position = position;
         this.genes = new Genotype(strongerParent.getGenes(), weakerParent.getGenes());
-        this.maxEnergy = strongerParent.getMaxEnergy();
-        this.energy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
+        this.startEnergy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
+        this.energy = this.startEnergy;
         this.moveEnergy = strongerParent.getMoveEnergy();
     }
 
     //konstruktor dla pierwszych zwierząt na mapie, bez rodziców
-    public Animal(TorusMap map, int startEnergy, int moveEnergy, int number) {
+    public Animal(TorusMap map, int startEnergy, int moveEnergy) {
         this.map = map;
         this.genes = new Genotype();
-        this.maxEnergy = startEnergy;
-        this.energy = this.maxEnergy;
+        this.startEnergy = startEnergy;
+        this.energy = startEnergy;
         this.moveEnergy = moveEnergy;
-        this.number = number;
         this.position = this.map.getLowerLeft().randomVector(this.map.getUpperRight());
         int rotate = this.genes.randomDirection();
         for (int i = 0; i < rotate; i++){
@@ -54,7 +51,7 @@ public class Animal {
         return this.genes;
     }
 
-    public int getMaxEnergy() { return this.maxEnergy; }
+    public int getStartEnergy() { return startEnergy; }
 
     public int getEnergy() { return this.energy; }
 
@@ -76,7 +73,6 @@ public class Animal {
 
     public void eat(int grassEnergy){
         this.energy += grassEnergy;
-        if (this.energy > this.maxEnergy) this.energy = this.maxEnergy;
     }
 
     public Animal reproduce(Animal secondParent, Vector2d childPosition){

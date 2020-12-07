@@ -4,13 +4,13 @@ public class SimulationEngine implements IEngine {
     private TorusMap map;
     private int ages;
 
-    public SimulationEngine(int numberOfAnimals, int startEnergy, int moveEnergy, int grassEnergy, Vector2d upperRight, int numberOfGrass, float jungleRatio, int ages) {
-        this.map = new TorusMap(upperRight, numberOfGrass, grassEnergy, jungleRatio);
+    public SimulationEngine(int numberOfAnimals, int startEnergy, int moveEnergy, int grassEnergy, Vector2d upperRight, float jungleRatio, int ages) {
+        this.map = new TorusMap(upperRight, grassEnergy, jungleRatio);
         this.ages = ages;
         boolean added = false;
         for (int i = 0; i < numberOfAnimals; i++){
-            Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy, i);
-            // jeśli zwierze nie może zostać umieszczone na mapie generuje mu nowy wektor
+            Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy);
+            // jeśli zwierze nie może zostać umieszczone na mapie, generuje mu nowy wektor
             while(!added){
                 if(this.map.place(newAnimal)) added = true;
                 else newAnimal.generateNewPosition();
