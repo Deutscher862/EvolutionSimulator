@@ -28,6 +28,7 @@ public class Animal {
         this.startEnergy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
         this.energy = this.startEnergy;
         this.moveEnergy = strongerParent.getMoveEnergy();
+        informAboutDescendant();
     }
 
     //konstruktor dla pierwszych zwierząt na mapie, bez rodziców
