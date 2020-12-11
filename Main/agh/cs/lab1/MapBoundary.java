@@ -74,4 +74,9 @@ public class MapBoundary implements IPositionChangeObserver {
         setNewPosition(this.yAxisSet, newPosition);
     }
 
+    @Override
+    public void EnergyRunOut(Animal animal) {
+
+    }
+
 }

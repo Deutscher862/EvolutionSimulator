@@ -37,4 +37,9 @@ public class GrassField extends AbstractWorldMap{
         //jeśli na pozycji nie ma zwięrzęcia sprawdzam na niej obecność trawy
         else return this.mapOfGrass.get(position);
     }
+
+    @Override
+    public void EnergyRunOut(Animal animal) {
+
+    }
 }

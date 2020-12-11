@@ -5,6 +5,7 @@ import java.util.*;
 public class TorusMap implements IWorldMap, IPositionChangeObserver {
     private final Random rand  = new Random();
     private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
+    private final ArrayList<Animal> animalsToRemove = new ArrayList<>();
     private final Comparator<Animal> comparator = new EnergyCompare();
     protected final Map<Vector2d, List<Animal>> mapOfAnimals = new HashMap<>();
     private final Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
@@ -217,44 +218,14 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     }
 
     public void removeDeadAnimals() {
-        //Set<Vector2d> animalPositions = this.mapOfAnimals.keySet();
-        Iterator<Map.Entry<Vector2d,List<Animal>>> iter = this.mapOfAnimals.entrySet().iterator();
-        while (iter.hasNext()) {
-            List<Animal> currentList = iter.next().getValue();
-            while (currentList.size() > 0 && currentList.get(currentList.size() - 1).getEnergy() <= 0) {
-                Animal deadAnimal = currentList.get(currentList.size() - 1);
-
-                this.listOfAnimals.remove(deadAnimal);
-                this.numberOfAnimals -= 1;
-
-                currentList.remove(deadAnimal);
-                System.out.println("umarło :c");
-            }
-            if (currentList.size() == 0) {
-                iter.remove();
-            }
+        this.numberOfAnimals -= this.animalsToRemove.size();
+        for(Animal animal : this.animalsToRemove){
+            this.listOfAnimals.remove(animal);
         }
-        /*
-        for(Iterator<Vector2d> i = animalPositions.iterator(); i.hasNext();){
-            List<Animal> list = this.mapOfAnimals.get(i);
-            //lista jest posortowana, więc usuwam ostatni element dopóki są tam martwe zwierzęta
-            while (list.size() > 0 && list.get(list.size() - 1).getEnergy() <= 0) {
-                Animal deadAnimal = list.get(list.size() - 1);
-
-                this.listOfAnimals.remove(deadAnimal);
-                this.numberOfAnimals -= 1;
-
-                list.remove(deadAnimal);
-                System.out.println("umarło :c");
-            }
-            if (list.size() == 0) {
-                i.remove();
-            }
-        }
-
-         */
+        this.animalsToRemove.clear();
     }
 
+    @Override
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animalToMove) {
         //usuwam zwierzę z hashmapy na starym polu
         List<Animal> oldPositionList = this.mapOfAnimals.get(oldPosition);
@@ -280,5 +251,16 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             newPositionList.add(animalToMove);
             newPositionList.sort(comparator);
         }
+    }
+
+    @Override
+    public void EnergyRunOut(Animal animal) {
+        List<Animal> list = this.mapOfAnimals.get(animal.getPosition());
+        list.remove(animal);
+        if (list.size() == 0) this.mapOfAnimals.remove(animal.getPosition());
+        //ponieważ martwe zwierzę wykonuje teraz ruch, nie mogę usunąc go z list zwierząt
+        // zapisuję je więc do listy zwierząt do usunięcia
+        this.animalsToRemove.add(animal);
+        System.out.println("umarło :c");
     }
 }

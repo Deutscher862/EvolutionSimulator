@@ -68,7 +68,9 @@ public class Animal {
         this.position = newPosition.getBackToMap(this.map.getUpperRight());
 
         this.energy -= this.moveEnergy;
-        informObservers(oldPosition, this.position);
+
+        changedPositionInform(oldPosition, this.position);
+        if(this.energy <= 0) energyRunOutInform();
     }
 
     public void eat(int grassEnergy){
@@ -90,10 +92,15 @@ public class Animal {
         this.observers.remove(observer);
     }
 
-    private void informObservers(Vector2d oldPosition, Vector2d newPosition){
-        //wszyscy obserwatorzy zostają powiadomieni o zmianie
+    private void changedPositionInform(Vector2d oldPosition, Vector2d newPosition){
         for(IPositionChangeObserver ob : this.observers){
             ob.positionChanged(oldPosition, newPosition, this);
+        }
+    }
+
+    private void energyRunOutInform(){
+        for(IPositionChangeObserver ob : this.observers){
+            ob.EnergyRunOut(this);
         }
     }
 

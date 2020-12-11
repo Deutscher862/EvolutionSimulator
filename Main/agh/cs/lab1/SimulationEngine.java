@@ -40,6 +40,7 @@ public class SimulationEngine implements IEngine {
             //this.map.move();
             this.map.growGrass();
             ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+
             for(Animal currentAnimal : listOfAnimals){
                 currentAnimal.move();
             }
