@@ -37,10 +37,11 @@ public class SimulationEngine implements IEngine {
     public void run() {
         System.out.println(this.map.toString());
         for (int i = 0; i < this.ages; i++) {
-            //this.map.move();
             this.map.growGrass();
-            ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
 
+            //poruszam zwierzętami z mapy
+            ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+            System.out.println(this.map.stats.toString());
             for(Animal currentAnimal : listOfAnimals){
                 currentAnimal.move();
             }
@@ -48,17 +49,8 @@ public class SimulationEngine implements IEngine {
             this.map.removeDeadAnimals();
             this.map.grassEating();
             this.map.reproduce();
-            /*
-            Set<Vector2d> animalPositions = this.map.getMapOfAnimals().keySet();
-            for(Vector2d currentPosition : animalPositions){
+            this.map.stats.countAverages(this.map.getListOfAnimals());
 
-                for(Animal animal : this.map.getMapOfAnimals().get(currentPosition)){
-                    System.out.println(animal.getEnergy());
-                }
-                System.out.println(" ");
-
-            }
-*/
             System.out.println(this.map.toString());
         }
     }

@@ -4,7 +4,7 @@ public class World {
 
     public static void main(String[] args) {
         try {
-            int numberOfAnimals = 2;
+            int numberOfAnimals = 50;
             int startEnergy = 30;
             int moveEnergy = 1;
             int grassEnergy  =2;

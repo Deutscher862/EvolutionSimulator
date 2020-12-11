@@ -1,6 +1,7 @@
 package agh.cs.lab1;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 public class Genotype {
@@ -29,6 +30,22 @@ public class Genotype {
         return Arrays.toString(this.genes);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof Genotype){
+            return Arrays.equals(this.genes, ((Genotype) o).genes);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(rand);
+        result = 31 * result + Arrays.hashCode(genes);
+        result = 31 * result + Arrays.hashCode(directions);
+        return result;
+    }
+
     protected int randomDirection(){
         return this.genes[rand.nextInt(32)];
     }
@@ -53,7 +70,6 @@ public class Genotype {
             else this.genes[i] = strongerGenes[i];
             this.directions[this.genes[i]] += 1;
         }
-        System.out.println(Arrays.toString(this.directions));
         validate();
     }
 

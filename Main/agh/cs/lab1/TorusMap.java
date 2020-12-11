@@ -15,8 +15,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
     private final Vector2d jungleUpperRight;
-    private int numberOfAnimals = 0;
-    private int numberOfGrass = 0;
+    public final Statistics stats = new Statistics();
 
     public TorusMap(Vector2d upperRight, int grassEnergy, float jungleRatio){
         this.upperRight = upperRight;
@@ -94,7 +93,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         }
         animal.addObserver(this);
         listOfAnimals.add(animal);
-        this.numberOfAnimals += 1;
+        this.stats.numberOfAnimals += 1;
         return true;
     }
 
@@ -122,6 +121,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             newPosition = savannahFreeSpace.get(rand.nextInt(savannahFreeSpace.size()));
             newGrass = new Grass(newPosition, this.grassEnergy);
             this.mapOfGrass.put(newPosition, newGrass);
+            this.stats.numberOfGrass += 1;
         }
 
         // w dżungli
@@ -130,10 +130,12 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             newPosition = jungleFreeSpace.get(rand.nextInt(jungleFreeSpace.size()));
             newGrass = new Grass(newPosition, this.grassEnergy);
             this.mapOfGrass.put(newPosition, newGrass);
+            this.stats.numberOfGrass += 1;
         }
     }
 
     public void grassEating(){
+        //iteruję po wszystkich polach z roślinami, szukając na nich zwierząt
         Iterator<Map.Entry<Vector2d,Grass>> iter = this.mapOfGrass.entrySet().iterator();
         while (iter.hasNext()) {
             Vector2d currentGrassPosition = iter.next().getKey();
@@ -151,13 +153,14 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
                     list.get(i).eat(grass.getEnergy() / sameEnergyCounter);
                 }
                 //trawa znika z mapy
-                numberOfGrass -= 1;
+                this.stats.numberOfGrass -= 1;
                 iter.remove();
             }
         }
     }
 
     public void reproduce(){
+        //iteruję po wszystkich polach z mapy, na których znajdują się zwierzęta
         ArrayList<Animal> childrenToPlace = new ArrayList<>();
         for (Map.Entry<Vector2d, List<Animal>> vector2dListEntry : this.mapOfAnimals.entrySet()) {
             List<Animal> currentList = vector2dListEntry.getValue();
@@ -210,16 +213,19 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
                     }
                     Animal child = strongerParent.reproduce(weakerParent, childPosition);
                     childrenToPlace.add(child);
-                    //this.place(child);
                 }
             }
         }
+        //gdy wszystkie dzieci zostają stworzone, dodaję je do mapy
         for(Animal child : childrenToPlace) this.place(child);
     }
 
     public void removeDeadAnimals() {
-        this.numberOfAnimals -= this.animalsToRemove.size();
+        //usuwam wszystkie martwe zwierzęta z mapy
+        this.stats.numberOfAnimals -= this.animalsToRemove.size();
+        this.stats.numberOfDeadAnimals += this.animalsToRemove.size();
         for(Animal animal : this.animalsToRemove){
+            this.stats.sumOfLifeLengths += animal.getLifeLength();
             this.listOfAnimals.remove(animal);
         }
         this.animalsToRemove.clear();
@@ -258,9 +264,8 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         List<Animal> list = this.mapOfAnimals.get(animal.getPosition());
         list.remove(animal);
         if (list.size() == 0) this.mapOfAnimals.remove(animal.getPosition());
-        //ponieważ martwe zwierzę wykonuje teraz ruch, nie mogę usunąc go z list zwierząt
-        // zapisuję je więc do listy zwierząt do usunięcia
+        //ponieważ martwe zwierzę wykonuje ruch w SimulationEngine, nie mogę usunąc go z listy zwierząt
+        // zapisuję je więc do listy zwierząt do usunięcia, którą wywołam po zakończenia ruchu zwierzęcia
         this.animalsToRemove.add(animal);
-        System.out.println("umarło :c");
     }
 }
