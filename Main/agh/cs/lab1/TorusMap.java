@@ -91,6 +91,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             list.add(animal);
             list.sort(comparator);
         }
+        this.stats.addToHashmap(animal);
         animal.addObserver(this);
         listOfAnimals.add(animal);
         this.stats.numberOfAnimals += 1;
@@ -227,6 +228,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         for(Animal animal : this.animalsToRemove){
             this.stats.sumOfLifeLengths += animal.getLifeLength();
             this.listOfAnimals.remove(animal);
+            this.stats.removeFromHashmap(animal);
         }
         this.animalsToRemove.clear();
     }

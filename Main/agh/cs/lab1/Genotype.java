@@ -40,10 +40,7 @@ public class Genotype {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(rand);
-        result = 31 * result + Arrays.hashCode(genes);
-        result = 31 * result + Arrays.hashCode(directions);
-        return result;
+        return Arrays.hashCode(genes);
     }
 
     protected int randomDirection(){

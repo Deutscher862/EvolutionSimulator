@@ -12,11 +12,12 @@ public class Animal {
     private final Animal firstParent;
     private final Animal secondParent;
     private int lifeLength = 0;
-    private int numberOfChildren = 0;
-    private int numberOfDescendants = 0;
+    private int aliveChildren = 0;
     private final int startEnergy;
     private int energy;
     private final int moveEnergy;
+    private int aliveDescendants = 0;
+    private boolean visited = false;
 
     //konstruktor dla zwierząt stworzonych podczas rozmnażania
     public Animal(TorusMap map, Animal strongerParent, Animal weakerParent, Vector2d position) {
@@ -25,10 +26,10 @@ public class Animal {
         this.firstParent = strongerParent;
         this.secondParent = weakerParent;
         this.genes = new Genotype(strongerParent.getGenes(), weakerParent.getGenes());
-        this.startEnergy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
-        this.energy = this.startEnergy;
+        this.startEnergy = strongerParent.startEnergy;
+        this.energy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
         this.moveEnergy = strongerParent.getMoveEnergy();
-        informAboutDescendant();
+        informAboutDescendant(false);
     }
 
     //konstruktor dla pierwszych zwierząt na mapie, bez rodziców
@@ -69,7 +70,7 @@ public class Animal {
 
     public int getLifeLength() { return lifeLength; }
 
-    public int getNumberOfChildren() { return numberOfChildren; }
+    public int getAliveChildren() { return aliveChildren; }
 
     public void move() {
         int rotate = this.genes.randomDirection();
@@ -83,8 +84,16 @@ public class Animal {
 
         this.energy -= this.moveEnergy;
         this.lifeLength += 1;
-        changedPositionInform(oldPosition, this.position);
-        if(this.energy <= 0) energyRunOutInform();
+        this.map.positionChanged(oldPosition, this.position, this);
+        if(this.energy <= 0) {
+            //gdy zwierzę umarło przekazuję informację o tym do mapy i wszystkich przodków
+            this.map.EnergyRunOut(this);
+            if(this.firstParent != null)
+                this.firstParent.aliveChildren -= 1;
+            if(this.secondParent != null)
+                this.secondParent.aliveChildren -= 1;
+            informAboutDescendant(true);
+        }
     }
 
     public void eat(int grassEnergy){
@@ -92,11 +101,11 @@ public class Animal {
     }
 
     public Animal reproduce(Animal secondParent, Vector2d childPosition){
-        Animal child = new Animal(this.map,this, secondParent, childPosition);
         this.energy -= this.energy/4;
         secondParent.energy -= secondParent.energy/4;
-        this.numberOfChildren += 1;
-        secondParent.numberOfChildren += 1;
+        Animal child = new Animal(this.map,this, secondParent, childPosition);
+        this.aliveChildren += 1;
+        secondParent.aliveChildren += 1;
         return child;
     }
 
@@ -104,26 +113,16 @@ public class Animal {
         this.observers.add(observer);
     }
 
-    public void removeObserver(IPositionChangeObserver observer){
-        this.observers.remove(observer);
-    }
-
-    private void changedPositionInform(Vector2d oldPosition, Vector2d newPosition){
-        for(IPositionChangeObserver ob : this.observers){
-            ob.positionChanged(oldPosition, newPosition, this);
-        }
-    }
-
-    private void informAboutDescendant(){
-        this.numberOfDescendants += 1;
-        if(this.firstParent != null) this.firstParent.informAboutDescendant();
-        if(this.secondParent != null) this.secondParent.informAboutDescendant();
-    }
-
-    private void energyRunOutInform(){
-        for(IPositionChangeObserver ob : this.observers){
-            ob.EnergyRunOut(this);
-        }
+    private void informAboutDescendant(boolean deadInformation){
+        //rekurencyjna funkcja odwłująca się do kolejnych przodków zwierzęcia informując o jego stanie
+        //deadInformation 0 - nowonarodzony, 1 - martwy
+        if (!deadInformation)
+            this.aliveDescendants += 1;
+        else this.aliveDescendants -= 1;
+        this.visited = true;
+        if(this.firstParent != null && !firstParent.visited) this.firstParent.informAboutDescendant(deadInformation);
+        if(this.secondParent != null && !secondParent.visited) this.secondParent.informAboutDescendant(deadInformation);
+        this.visited = false;
     }
 
     public void generateNewPosition() {

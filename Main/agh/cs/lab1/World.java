@@ -4,13 +4,13 @@ public class World {
 
     public static void main(String[] args) {
         try {
-            int numberOfAnimals = 50;
+            int numberOfAnimals = 2;
             int startEnergy = 30;
             int moveEnergy = 1;
-            int grassEnergy  =2;
+            int grassEnergy  =20;
             Vector2d upperRight = new Vector2d(10, 10);
             float jungleRatio = 0.3f;
-            int ages = 100;
+            int ages = 1000;
             SimulationEngine engine = new SimulationEngine(numberOfAnimals, startEnergy, moveEnergy, grassEnergy, upperRight, jungleRatio, ages);
 
             engine.run();

@@ -38,14 +38,12 @@ public class SimulationEngine implements IEngine {
         System.out.println(this.map.toString());
         for (int i = 0; i < this.ages; i++) {
             this.map.growGrass();
-
             //poruszam zwierzętami z mapy
             ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
             System.out.println(this.map.stats.toString());
             for(Animal currentAnimal : listOfAnimals){
                 currentAnimal.move();
             }
-
             this.map.removeDeadAnimals();
             this.map.grassEating();
             this.map.reproduce();
