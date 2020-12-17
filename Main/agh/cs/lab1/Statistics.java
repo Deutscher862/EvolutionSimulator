@@ -31,6 +31,10 @@ public class Statistics {
                 "\nAverage Children Number= " + averageNumberOfChildren;
     }
 
+    public int getAge() {
+        return age;
+    }
+
     public void countAverages(ArrayList<Animal> list) {
         this.age += 1;
         float averageEnergy = 0;
@@ -72,12 +76,15 @@ public class Statistics {
 
     public void addToHashmap(Animal animal){
         Genotype animalGenes = animal.getGenes();
+        this.numberOfAnimals += 1;
         if (this.currentGenesMap.get(animalGenes) == null) this.currentGenesMap.put(animalGenes, 1);
         else this.currentGenesMap.replace(animalGenes, this.currentGenesMap.get(animalGenes) + 1);
     }
 
     public void removeFromHashmap(Animal animal){
         Genotype animalGenes = animal.getGenes();
+        this.numberOfAnimals -= 1;
+        this.numberOfDeadAnimals += 1;
         this.sumOfLifeLengths += animal.getLifeLength();
         this.currentGenesMap.replace(animalGenes, this.currentGenesMap.get(animalGenes) - 1);
         if(this.currentGenesMap.get(animalGenes) == 0) this.currentGenesMap.remove(animalGenes);

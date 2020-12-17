@@ -20,7 +20,8 @@ public class SimulationEngine implements IEngine {
     private TorusMap map;
     private final MapVizualizerFX vizualizer;
     private final float appMapSize = 800;
-    private final int appStatsSize = 300;
+    private final int appStatsSize = 400;
+    private boolean isOn = true;
 
     public SimulationEngine(int numberOfAnimals, Stage stage, int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, float jungleRatio) {
         this.map = new TorusMap(size, grassEnergy, jungleRatio);
@@ -40,7 +41,7 @@ public class SimulationEngine implements IEngine {
             tileSize = (int) Math.floor(appMapSize / size.y);
         }
         else tileSize = (int) Math.floor(appMapSize / size.x);
-        this.vizualizer = new MapVizualizerFX(this.map, tileSize, size);
+        this.vizualizer = new MapVizualizerFX(this.map, tileSize, size, this);
         stage.setTitle("Evolution Generator");
         stage.setScene(new Scene(vizualizer.getRoot(), appMapSize+appStatsSize+20, appMapSize + 20));
         stage.show();
@@ -49,21 +50,30 @@ public class SimulationEngine implements IEngine {
     @Override
     public void run() {
         //System.out.println(this.map.toString());
-        newDay();
+        this.vizualizer.drawScene();
         new Thread (() ->{
-            while(true) {
-                this.vizualizer.drawScene();
+            //this.vizualizer.refresh();
+            while(isOn) {
                 newDay();
-
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                this.vizualizer.drawScene();
             }
         }).start();
         //System.out.println(this.map.toString());
         //System.out.println(this.map.stats.toString());
+    }
+
+    public void pause(){
+        if (isOn = true)
+            isOn = false;
+        else{
+            isOn = true;
+            run();
+        }
     }
 
     private void newDay(){

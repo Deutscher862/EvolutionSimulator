@@ -57,7 +57,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     public ArrayList<ArrayList<Vector2d>> searchForFreeSpace(){
         //search[0] - savannahFreeSpace, search[1] - jungleFreeSpace
         Vector2d checkPosition;
-        ArrayList<ArrayList<Vector2d> > search =
+        ArrayList<ArrayList<Vector2d> > freeSpace =
                 new ArrayList<>(2);
         ArrayList<Vector2d> jungleFreeSpace = new ArrayList<>();
         ArrayList<Vector2d> savannahFreeSpace = new ArrayList<>();
@@ -71,9 +71,9 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
                 }
             }
         }
-        search.add(savannahFreeSpace);
-        search.add(jungleFreeSpace);
-        return search;
+        freeSpace.add(savannahFreeSpace);
+        freeSpace.add(jungleFreeSpace);
+        return freeSpace;
     }
 
     @Override
@@ -97,7 +97,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         this.stats.addToHashmap(animal);
         animal.addObserver(this);
         listOfAnimals.add(animal);
-        this.stats.numberOfAnimals += 1;
         return true;
     }
 
@@ -227,8 +226,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
 
     public void removeDeadAnimals() {
         //usuwam wszystkie martwe zwierzęta z mapy
-        this.stats.numberOfAnimals -= this.animalsToRemove.size();
-        this.stats.numberOfDeadAnimals += this.animalsToRemove.size();
         for(Animal animal : this.animalsToRemove){
             this.listOfAnimals.remove(animal);
             this.stats.removeFromHashmap(animal);
