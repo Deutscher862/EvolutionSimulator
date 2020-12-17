@@ -3,6 +3,7 @@ package agh.cs.lab1;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 
 public class Tile extends StackPane{
     private final int size;
@@ -23,8 +24,9 @@ public class Tile extends StackPane{
         this.setTranslateY(y*size+10);
     }
 
-    public void setFill(Color color) {
+    public void setColor(Color color) {
         this.color = color;
         this.rectangle.setFill(this.color);
     }
+
 }

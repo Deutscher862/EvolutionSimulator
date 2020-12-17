@@ -52,21 +52,21 @@ public class MapVizualizerFX {
             for(int j = 0; j < this.size.y; j++){
                 Vector2d position = new Vector2d(i, j);
                 Object object = this.map.objectAt(position);
-                this.grid[i][j].setFill(Color.LIGHTGREEN);
+                this.grid[i][j].setColor(Color.LIGHTGREEN);
                 if(object instanceof Animal)
                 {
                     int animalStartEnergy = ((Animal) object).getStartEnergy();
                     int animalEnergy = ((Animal) object).getEnergy();
                     if (animalEnergy >= animalStartEnergy*3/4)
-                        grid[i][j].setFill(Color.MAGENTA);
+                        grid[i][j].setColor(Color.MAGENTA);
                     else if(animalEnergy >= animalStartEnergy/2)
-                        grid[i][j].setFill(Color.BROWN);
+                        grid[i][j].setColor(Color.BROWN);
                     else if(animalEnergy >= animalStartEnergy/4)
-                        grid[i][j].setFill(Color.GRAY);
-                    else grid[i][j].setFill(Color.LIGHTGRAY);
+                        grid[i][j].setColor(Color.GRAY);
+                    else grid[i][j].setColor(Color.LIGHTGRAY);
                 }
                 else if(object instanceof Grass)
-                    this.grid[i][j].setFill(Color.GREEN);
+                    this.grid[i][j].setColor(Color.GREEN);
             }
         }
         this.statistics.setText(this.map.stats.toString());
