@@ -11,18 +11,24 @@ Następuje pętla, a w niej:
 3. Rośnie nowa trawa
  */
 
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 import java.util.ArrayList;
 
 public class SimulationEngine implements IEngine {
     private TorusMap map;
     private int ages;
+    private final MapVizualizerFX vizualizer;
+    private final float appMapSize = 500;
+    private final int appStatsSize = 300;
 
-    public SimulationEngine(int numberOfAnimals, int startEnergy, int moveEnergy, int grassEnergy, Vector2d upperRight, float jungleRatio, int ages) {
-        this.map = new TorusMap(upperRight, grassEnergy, jungleRatio);
+    public SimulationEngine(int numberOfAnimals, Stage stage, int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, float jungleRatio, int ages) {
+        this.map = new TorusMap(size, grassEnergy, jungleRatio);
         this.ages = ages;
         //jeśli zwierząt jest więcej niż miejsc na mapie, zmniejszam ilość zwierząt
-        int mapSize = (upperRight.x + 1)*(upperRight.y + 1);
-        if (numberOfAnimals > mapSize) numberOfAnimals = mapSize;
+        int torusMapSize = (size.x)*(size.y);
+        if (numberOfAnimals > torusMapSize) numberOfAnimals = torusMapSize;
 
         for (int i = 0; i < numberOfAnimals; i++){
             Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy);
@@ -31,25 +37,44 @@ public class SimulationEngine implements IEngine {
                 newAnimal.generateNewPosition();
             this.map.place(newAnimal);
         }
+        int tileSize;
+        if(size.x < size.y){
+            tileSize = (int) Math.floor(appMapSize / size.y);
+        }
+        else tileSize = (int) Math.floor(appMapSize / size.x);
+        this.vizualizer = new MapVizualizerFX(this.map, tileSize, size);
+
+        stage.setScene(new Scene(vizualizer.getRoot(), appMapSize+appStatsSize, appMapSize));
+        stage.show();
+
     }
 
     @Override
     public void run() {
-        System.out.println(this.map.toString());
-        for (int i = 0; i < this.ages; i++) {
-            this.map.growGrass();
-            //poruszam zwierzętami z mapy
-            ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-            System.out.println(this.map.stats.toString());
-            for(Animal currentAnimal : listOfAnimals){
-                currentAnimal.move();
+        //System.out.println(this.map.toString());
+        new Thread (() ->{
+            while(true) {
+                this.map.growGrass();
+                this.vizualizer.outputMap();
+                //poruszam zwierzętami z mapy
+                ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+                for(Animal currentAnimal : listOfAnimals){
+                    currentAnimal.move();
+                }
+                this.map.removeDeadAnimals();
+                this.map.grassEating();
+                this.map.reproduce();
+                this.map.stats.countAverages(this.map.getListOfAnimals());
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            this.map.removeDeadAnimals();
-            this.map.grassEating();
-            this.map.reproduce();
-            this.map.stats.countAverages(this.map.getListOfAnimals());
-
-            System.out.println(this.map.toString());
+        }).start();
+         {
+            //System.out.println(this.map.toString());
+            //System.out.println(this.map.stats.toString());
         }
     }
 }

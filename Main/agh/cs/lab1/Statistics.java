@@ -50,12 +50,12 @@ public class Statistics {
         }
         if (genesMap.size() > 0) {
             //sortuję hashmapę genotypów po ilości ich występowania
-            System.out.println(this.genesMap.toString());
+            //System.out.println(this.genesMap.toString());
             LinkedHashMap<Genotype, Integer> sortedGenes = this.genesMap.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-            System.out.println(sortedGenes.toString());
+            //System.out.println(sortedGenes.toString());
             Map.Entry<Genotype, Integer> entry = sortedGenes.entrySet().iterator().next();
             if(entry.getValue() > this.strongestGenotypeAmount) {
                 this.strongestGenotype = entry.getKey();

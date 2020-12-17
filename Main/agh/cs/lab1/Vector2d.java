@@ -62,10 +62,11 @@ public class Vector2d {
     }
 
     public Vector2d randomVector(Vector2d other){
-        return new Vector2d(rand.nextInt(other.x-this.x + 1) + this.x, rand.nextInt(other.y-this.y + 1) + this.y);
+        return new Vector2d(rand.nextInt(other.x-this.x) + this.x, rand.nextInt(other.y-this.y) + this.y);
     }
     //wektor zwracający wartość na przeciwnym krańcu mapy, załatwia to kształt torusa
     public Vector2d getBackToMap(Vector2d max){
+        max = new Vector2d(max.x-1, max.y-1);
         if(this.follows(new Vector2d(0, 0)) && this.precedes(max)) return this;
         else if (this.x < 0) {
             if (this.y < 0) return max;

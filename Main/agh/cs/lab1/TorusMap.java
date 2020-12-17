@@ -20,8 +20,14 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     public TorusMap(Vector2d upperRight, int grassEnergy, float jungleRatio){
         this.upperRight = upperRight;
         this.grassEnergy = grassEnergy;
-        this.jungleLowerLeft = new Vector2d(Math.round(jungleRatio*this.upperRight.x), Math.round(jungleRatio*this.upperRight.y));
-        this.jungleUpperRight = new Vector2d(Math.round(this.upperRight.x - this.upperRight.x*jungleRatio), Math.round(this.upperRight.y - this.upperRight.y*jungleRatio));
+        int jungleWidth = Math.round(upperRight.x * jungleRatio);
+        int jungleHeight = Math.round(upperRight.y * jungleRatio);
+
+        this.jungleLowerLeft = new Vector2d(upperRight.x/2-jungleWidth/2, upperRight.y/2-jungleHeight/2);
+        this.jungleUpperRight = new Vector2d(this.jungleLowerLeft.x+jungleWidth, this.jungleLowerLeft.y+jungleHeight);
+        System.out.println(this.lowerLeft.toString() + this.upperRight.toString());
+        System.out.println(this.jungleLowerLeft.toString() + this.jungleUpperRight.toString());
+
     }
 
     public Vector2d getUpperRight() {
@@ -59,8 +65,8 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         ArrayList<Vector2d> jungleFreeSpace = new ArrayList<>();
         ArrayList<Vector2d> savannahFreeSpace = new ArrayList<>();
 
-        for (int i = 0; i <= this.upperRight.x; i++){
-            for(int j = 0; j <= this.upperRight.y; j++){
+        for (int i = 0; i < this.upperRight.x; i++){
+            for(int j = 0; j < this.upperRight.y; j++){
                 checkPosition = new Vector2d(i, j);
                 if(!isOccupied(checkPosition)){
                     if(inJungle(checkPosition)) jungleFreeSpace.add(checkPosition);
