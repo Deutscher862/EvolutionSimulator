@@ -9,18 +9,22 @@ public class Tile extends StackPane{
     private final Rectangle rectangle;
     private final int x;
     private final int y;
+    public Color color;
 
     public Tile(int size, int x, int y, Color color){
         this.size = size;
         this.x = x;
         this.y = y;
-        this.rectangle = new Rectangle(size-1, size -1);
+        this.rectangle = new Rectangle(size, size );
         this.rectangle.setStroke(Color.BLACK);
         this.rectangle.setFill(color);
         this.getChildren().add(rectangle);
-        this.setTranslateX(x*size);
-        this.setTranslateY(y*size);
+        this.setTranslateX(x*size+10);
+        this.setTranslateY(y*size+10);
     }
 
-    public void setFill(Color color) {this.rectangle.setFill(color);}
+    public void setFill(Color color) {
+        this.color = color;
+        this.rectangle.setFill(this.color);
+    }
 }

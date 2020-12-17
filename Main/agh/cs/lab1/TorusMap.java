@@ -25,9 +25,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
 
         this.jungleLowerLeft = new Vector2d(upperRight.x/2-jungleWidth/2, upperRight.y/2-jungleHeight/2);
         this.jungleUpperRight = new Vector2d(this.jungleLowerLeft.x+jungleWidth, this.jungleLowerLeft.y+jungleHeight);
-        System.out.println(this.lowerLeft.toString() + this.upperRight.toString());
-        System.out.println(this.jungleLowerLeft.toString() + this.jungleUpperRight.toString());
-
     }
 
     public Vector2d getUpperRight() {
@@ -162,6 +159,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
                 //trawa znika z mapy
                 this.stats.numberOfGrass -= 1;
                 iter.remove();
+                grass=null;
             }
         }
     }
@@ -232,9 +230,9 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         this.stats.numberOfAnimals -= this.animalsToRemove.size();
         this.stats.numberOfDeadAnimals += this.animalsToRemove.size();
         for(Animal animal : this.animalsToRemove){
-            this.stats.sumOfLifeLengths += animal.getLifeLength();
             this.listOfAnimals.remove(animal);
             this.stats.removeFromHashmap(animal);
+            animal = null;
         }
         this.animalsToRemove.clear();
     }

@@ -10,15 +10,13 @@ public class World extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            stage.setTitle("Generator ewolucyjny");
-            int numberOfAnimals = 0;
+            int numberOfAnimals = 30;
             int startEnergy = 30;
             int moveEnergy = 1;
             int grassEnergy  =20;
             Vector2d upperRight = new Vector2d(50, 50);
-            float jungleRatio = 0.1f;
-            int ages = 1000;
-            SimulationEngine engine = new SimulationEngine(numberOfAnimals, stage, startEnergy, moveEnergy, grassEnergy, upperRight, jungleRatio, ages);
+            float jungleRatio = 0.3f;
+            SimulationEngine engine = new SimulationEngine(numberOfAnimals, stage, startEnergy, moveEnergy, grassEnergy, upperRight, jungleRatio);
             engine.run();
 
         } catch (Exception e) {

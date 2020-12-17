@@ -70,7 +70,7 @@ public class Vector2d {
         if(this.follows(new Vector2d(0, 0)) && this.precedes(max)) return this;
         else if (this.x < 0) {
             if (this.y < 0) return max;
-            else if( this.y > max.y) return new Vector2d(max.x,0 );
+            else if( this.y > max.y) return new Vector2d(max.x,0);
             else return new Vector2d(max.x ,this.y);
         }
         else if (this.x > max.x){

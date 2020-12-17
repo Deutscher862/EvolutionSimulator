@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Statistics {
+    private int age = 0 ;
     protected int numberOfGrass = 0;
     protected int numberOfAnimals = 0;
     protected int numberOfDeadAnimals = 0;
@@ -12,28 +13,26 @@ public class Statistics {
     private float averageLifeLength;
     private float averageNumberOfChildren;
     //hashmapa genotypów - klucz-genotyp, wartości - ilość występowania takich samych genów
-    private final Map<Genotype, Integer> genesMap = new HashMap<>();
-    private Genotype strongestGenotype;
+    private final Map<Genotype, Integer> currentGenesMap = new HashMap<>();
+    private final Map<Genotype, Integer> strongestGenesOfAllTime = new HashMap<>();
+    private Genotype currentStrongestGenotype;
     private int strongestGenotypeAmount = 0;
-
-    public Statistics() {
-    }
 
     @Override
     public String toString() {
-        return "Statistics{" +
-                "numberOfGrass=" + numberOfGrass +
-                ", numberOfAnimals=" + numberOfAnimals +
-                ", numberOfDeadAnimals=" + numberOfDeadAnimals +
-                ", sumOfLifeLengths=" + sumOfLifeLengths +
-                ", averageEnergy=" + averageEnergy +
-                ", averageLifeLength=" + averageLifeLength +
-                ", averageNumberOfChildren=" + averageNumberOfChildren +
-                ", strongestGenotype=" + strongestGenotype +
-                '}';
+        return "Statistics:" +
+                "\nAge= " + age +
+                "\nAlive Animals= " + numberOfAnimals +
+                "\nPlants= " + numberOfGrass +
+                "\nCurrent Strongest Genotype= " + currentStrongestGenotype +
+                "\nDead Animals= " + numberOfDeadAnimals +
+                "\nAverage Energy= \n" + averageEnergy +
+                "\nAverage Life Length= \n" + averageLifeLength +
+                "\nAverage Children Number= " + averageNumberOfChildren;
     }
 
     public void countAverages(ArrayList<Animal> list) {
+        this.age += 1;
         float averageEnergy = 0;
         float averageNumberOfChildren = 0;
 
@@ -48,34 +47,40 @@ public class Statistics {
             this.averageEnergy = 0;
             this.averageNumberOfChildren = 0;
         }
-        if (genesMap.size() > 0) {
+        if (currentGenesMap.size() > 0) {
             //sortuję hashmapę genotypów po ilości ich występowania
             //System.out.println(this.genesMap.toString());
-            LinkedHashMap<Genotype, Integer> sortedGenes = this.genesMap.entrySet().stream()
+            LinkedHashMap<Genotype, Integer> sortedGenes = this.currentGenesMap.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
             //System.out.println(sortedGenes.toString());
             Map.Entry<Genotype, Integer> entry = sortedGenes.entrySet().iterator().next();
             if(entry.getValue() > this.strongestGenotypeAmount) {
-                this.strongestGenotype = entry.getKey();
+                this.currentStrongestGenotype = entry.getKey();
                 this.strongestGenotypeAmount = entry.getValue();
             }
+            if(this.strongestGenesOfAllTime.get(this.currentStrongestGenotype) == null){
+                this.strongestGenesOfAllTime.put(this.currentStrongestGenotype, 1);
+            }
+            else{
+                this.strongestGenesOfAllTime.replace(this.currentStrongestGenotype, this.strongestGenesOfAllTime.get(this.currentStrongestGenotype) +1);
+            }
         }
-
         countAverageLifeLength();
     }
 
     public void addToHashmap(Animal animal){
         Genotype animalGenes = animal.getGenes();
-        if (this.genesMap.get(animalGenes) == null) this.genesMap.put(animalGenes, 1);
-        else this.genesMap.replace(animalGenes, this.genesMap.get(animalGenes) + 1);
+        if (this.currentGenesMap.get(animalGenes) == null) this.currentGenesMap.put(animalGenes, 1);
+        else this.currentGenesMap.replace(animalGenes, this.currentGenesMap.get(animalGenes) + 1);
     }
 
     public void removeFromHashmap(Animal animal){
         Genotype animalGenes = animal.getGenes();
-        this.genesMap.replace(animalGenes, this.genesMap.get(animalGenes) - 1);
-        if(this.genesMap.get(animalGenes) == 0) this.genesMap.remove(animalGenes);
+        this.sumOfLifeLengths += animal.getLifeLength();
+        this.currentGenesMap.replace(animalGenes, this.currentGenesMap.get(animalGenes) - 1);
+        if(this.currentGenesMap.get(animalGenes) == 0) this.currentGenesMap.remove(animalGenes);
     }
 
     public void countAverageLifeLength() {

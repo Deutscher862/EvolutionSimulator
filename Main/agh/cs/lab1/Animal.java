@@ -29,7 +29,7 @@ public class Animal {
         this.startEnergy = strongerParent.startEnergy;
         this.energy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
         this.moveEnergy = strongerParent.getMoveEnergy();
-        informAboutDescendant(false);
+        //informAboutDescendant(false);
     }
 
     //konstruktor dla pierwszych zwierząt na mapie, bez rodziców
@@ -92,7 +92,6 @@ public class Animal {
                 this.firstParent.aliveChildren -= 1;
             if(this.secondParent != null)
                 this.secondParent.aliveChildren -= 1;
-            informAboutDescendant(true);
         }
     }
 
