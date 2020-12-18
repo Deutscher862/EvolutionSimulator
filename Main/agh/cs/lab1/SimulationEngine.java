@@ -52,7 +52,7 @@ public class SimulationEngine implements IEngine {
     @Override
     public void run() {
         new Thread (() ->{
-            while(!this.vizualizer.stop) {
+            while(!this.vizualizer.paused) {
                 newDay();
                 try {
                     Thread.sleep(100);
@@ -60,7 +60,7 @@ public class SimulationEngine implements IEngine {
                     e.printStackTrace();
                 }
                 this.vizualizer.drawScene();
-                while(this.vizualizer.stop)
+                while(this.vizualizer.paused)
                     Thread.onSpinWait();
             }
         }).start();
