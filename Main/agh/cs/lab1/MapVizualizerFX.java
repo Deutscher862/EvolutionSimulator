@@ -17,6 +17,7 @@ public class MapVizualizerFX {
     private Text animalStatistics;
     protected boolean stop = false;
     private Animal selectedAnimal = null;
+    private final Button followAnimal;
 
     public MapVizualizerFX(TorusMap map, int tileSize, Vector2d size, SimulationEngine engine) {
         this.root = new Pane();
@@ -44,14 +45,13 @@ public class MapVizualizerFX {
         this.animalStatistics = new Text();
         this.animalStatistics.setWrappingWidth(200);
         this.animalStatistics.setTranslateX(850);
-        this.animalStatistics.setTranslateY((400));
+        this.animalStatistics.setTranslateY((340));
         this.animalStatistics.setFont(Font.font("Verdana", 15));
         this.root.getChildren().add(this.animalStatistics);
 
-
         Button startStopButton = new Button("Stop");
         startStopButton.setTranslateX(950);
-        startStopButton.setTranslateY(700);
+        startStopButton.setTranslateY(750);
         startStopButton.setMinSize(100, 50);
         startStopButton.setOnAction(event -> {
             if(this.stop){
@@ -65,9 +65,19 @@ public class MapVizualizerFX {
         });
         this.root.getChildren().add(startStopButton);
 
+        this.followAnimal = new Button("Follow Selected Animal");
+        this.followAnimal.setTranslateX(930);
+        this.followAnimal.setTranslateY(610);
+        this.followAnimal.setMinSize(100, 50);
+        this.followAnimal.setVisible(false);
+        this.followAnimal.setOnAction(event -> followAnimal());
+
+        this.root.getChildren().add(followAnimal);
+
+
         Button selectStrongestGenotypeAnimals = new Button("Show Strongest Animals");
         selectStrongestGenotypeAnimals.setTranslateX(930);
-        selectStrongestGenotypeAnimals.setTranslateY(600);
+        selectStrongestGenotypeAnimals.setTranslateY(680);
         selectStrongestGenotypeAnimals.setMinSize(100, 50);
         selectStrongestGenotypeAnimals.setOnAction(event ->selectStrongestGenes());
         this.root.getChildren().add(selectStrongestGenotypeAnimals);
@@ -80,14 +90,18 @@ public class MapVizualizerFX {
                 Object object = this.map.objectAt(position);
                 this.grid[i][j].setColor(Color.LIGHTGREEN);
                 if(object instanceof Animal){
-                    if(object.equals(this.selectedAnimal)) grid[i][j].setColor(Color.MAGENTA);
+                    if(object.equals(this.selectedAnimal)) this.grid[i][j].setColor(Color.MAGENTA);
                     else fillAnimalTile((Animal) object);
                 }
                 else if(object instanceof Grass)
                     this.grid[i][j].setColor(Color.GREEN);
             }
         }
+        this.followAnimal.setVisible(false);
         this.mapStatistics.setText(this.map.stats.toString());
+        if(this.selectedAnimal != null && this.selectedAnimal.type == AnimalType.SELECTED)
+            this.animalStatistics.setText(countSelectedAnimalStatistics());
+        else this.animalStatistics.setText("");
     }
 
     public void fillAnimalTile(Animal animal){
@@ -112,19 +126,49 @@ public class MapVizualizerFX {
         for(Animal animal : listOfAnimals){
             if(animal.getGenes().equals(this.map.stats.getCurrentStrongestGenotype())){
                 Vector2d position = animal.getPosition();
-                grid[position.x][position.y].setColor(Color.MAGENTA);
+                grid[position.x][position.y].setColor(Color.YELLOW);
             }
         }
     }
 
     public void selectAnimal(Vector2d position) {
         Object animal = this.map.objectAt(position);
-        if(animal instanceof Animal){
+        if(this.stop && animal instanceof Animal){
             if(this.selectedAnimal != null)
                 fillAnimalTile(this.selectedAnimal);
+            this.followAnimal.setVisible(true);
             this.selectedAnimal = (Animal) animal;
             grid[position.x][position.y].setColor(Color.MAGENTA);
-            this.animalStatistics.setText("Genotyp zaznaczonego zwierzęcia:\n" + ((Animal) animal).getGenes().toString());
+            this.animalStatistics.setText("Selected Animal Genotype= \n" + ((Animal) animal).getGenes().toString());
         }
+    }
+
+    private String countSelectedAnimalStatistics() {
+        int countChildren = 0;
+        int countDescendants = 0;
+        String diedAt = "-";
+        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+        for(Animal animal : listOfAnimals){
+            if (animal.getType() == AnimalType.CHILD) countChildren += 1;
+            else if (animal.getType() == AnimalType.DESCENDANT) countDescendants += 1;
+        }
+
+        return "Selected Animal Statistics:" +
+                "\nGenotype= " + this.selectedAnimal.getGenes()+
+                "\nAlive Children= " + countChildren +
+                "\nAlive Descendants= " + countDescendants +
+                "\nDied At= " + this.selectedAnimal.getDeadAge();
+
+    }
+
+    public void followAnimal(){
+        //ustawiam wszystkie zwierzęta na default
+        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+        for(Animal animal : listOfAnimals){
+            animal.type = AnimalType.DEFAULT;
+        }
+        this.selectedAnimal.type = AnimalType.SELECTED;
+        this.followAnimal.setVisible(false);
+        this.animalStatistics.setText(countSelectedAnimalStatistics());
     }
 }

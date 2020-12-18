@@ -12,13 +12,12 @@ public class Animal {
     private final Animal firstParent;
     private final Animal secondParent;
     private int lifeLength = 0;
+    private int deadAge;
     private int aliveChildren = 0;
     private final int startEnergy;
     private int energy;
     private final int moveEnergy;
-    private int aliveDescendants = 0;
-    private boolean visited = false;
-    private AnimalType type;
+    protected AnimalType type;
 
     public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position, AnimalType type){
         this.map = map;
@@ -58,6 +57,14 @@ public class Animal {
 
     public int getAliveChildren() { return aliveChildren; }
 
+    public int getDeadAge() {
+        return deadAge;
+    }
+
+    public AnimalType getType() {
+        return type;
+    }
+
     public void move() {
         int rotate = this.genes.randomDirection();
         for (int i = 0; i < rotate; i++){
@@ -78,6 +85,7 @@ public class Animal {
                 this.firstParent.aliveChildren -= 1;
             if(this.secondParent != null)
                 this.secondParent.aliveChildren -= 1;
+            this.deadAge = this.map.stats.getAge();
         }
     }
 
@@ -100,18 +108,6 @@ public class Animal {
 
     public void addObserver(IPositionChangeObserver observer){
         this.observers.add(observer);
-    }
-
-    private void informAboutDescendant(boolean deadInformation){
-        //rekurencyjna funkcja odwłująca się do kolejnych przodków zwierzęcia informując o jego stanie
-        //deadInformation 0 - nowonarodzony, 1 - martwy
-        if (!deadInformation)
-            this.aliveDescendants += 1;
-        else this.aliveDescendants -= 1;
-        this.visited = true;
-        if(this.firstParent != null && !firstParent.visited) this.firstParent.informAboutDescendant(deadInformation);
-        if(this.secondParent != null && !secondParent.visited) this.secondParent.informAboutDescendant(deadInformation);
-        this.visited = false;
     }
 
     public void generateNewPosition() {

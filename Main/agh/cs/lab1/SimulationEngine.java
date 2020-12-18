@@ -52,7 +52,6 @@ public class SimulationEngine implements IEngine {
     @Override
     public void run() {
         new Thread (() ->{
-            //this.vizualizer.refresh();
             while(!this.vizualizer.stop) {
                 newDay();
                 try {
