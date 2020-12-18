@@ -3,25 +3,24 @@ package agh.cs.lab1;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 
 public class Tile extends StackPane{
     private final int size;
     private final Rectangle rectangle;
-    private final int x;
-    private final int y;
+    private final Vector2d position;
     public Color color;
 
-    public Tile(int size, int x, int y, Color color){
+    public Tile(int size, Vector2d position, Color color, MapVizualizerFX vizualizerFX){
         this.size = size;
-        this.x = x;
-        this.y = y;
+        this.position = position;
         this.rectangle = new Rectangle(size, size );
         this.rectangle.setStroke(Color.BLACK);
         this.rectangle.setFill(color);
         this.getChildren().add(rectangle);
-        this.setTranslateX(x*size+10);
-        this.setTranslateY(y*size+10);
+        this.setTranslateX(this.position.x*size+10);
+        this.setTranslateY(this.position.y*size+10);
+
+        setOnMouseClicked(event -> vizualizerFX.selectAnimal(this.position));
     }
 
     public void setColor(Color color) {

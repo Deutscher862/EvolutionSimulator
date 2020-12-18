@@ -35,7 +35,7 @@ public class SimulationEngine implements IEngine {
             // jeśli pozycja na mapie jest już zajęta, generuje mu nowy wektor
             while(this.map.isOccupied(newPosition))
                 newPosition = lowerLeft.randomVector(size);
-            Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy, null, null, newPosition);
+            Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy, null, null, newPosition, AnimalType.DEFAULT);
             this.map.place(newAnimal);
         }
         int tileSize;
@@ -53,7 +53,6 @@ public class SimulationEngine implements IEngine {
     public void run() {
         new Thread (() ->{
             //this.vizualizer.refresh();
-            //XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
             while(!this.vizualizer.stop) {
                 newDay();
                 try {
@@ -63,7 +62,7 @@ public class SimulationEngine implements IEngine {
                 }
                 this.vizualizer.drawScene();
                 while(this.vizualizer.stop)
-                    System.out.println();
+                    Thread.onSpinWait();
             }
         }).start();
     }

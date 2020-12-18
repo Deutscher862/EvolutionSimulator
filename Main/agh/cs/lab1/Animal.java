@@ -18,8 +18,9 @@ public class Animal {
     private final int moveEnergy;
     private int aliveDescendants = 0;
     private boolean visited = false;
+    private AnimalType type;
 
-    public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position){
+    public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position, AnimalType type){
         this.map = map;
         this.firstParent = firstParent;
         this.secondParent = secondParent;
@@ -27,6 +28,7 @@ public class Animal {
         this.energy = startEnergy;
         this.moveEnergy = moveEnergy;
         this.position = position;
+        this.type = type;
         if (firstParent == null)
             this.genes = new Genotype();
         else this.genes = new Genotype(firstParent.getGenes(), secondParent.getGenes());
@@ -86,7 +88,11 @@ public class Animal {
     public Animal reproduce(Animal secondParent, Vector2d childPosition){
         this.energy -= this.energy/4;
         secondParent.energy -= secondParent.energy/4;
-        Animal child = new Animal(this.map,(this.energy+secondParent.energy)/4, this.moveEnergy, this, secondParent, childPosition);
+        AnimalType childType;
+        if(this.type == AnimalType.SELECTED || secondParent.type == AnimalType.SELECTED) childType = AnimalType.CHILD;
+        else if(this.type == AnimalType.CHILD || secondParent.type == AnimalType.CHILD || this.type == AnimalType.DESCENDANT || secondParent.type == AnimalType.DESCENDANT)  childType = AnimalType.DESCENDANT;
+        else childType = AnimalType.DEFAULT;
+        Animal child = new Animal(this.map,(this.energy+secondParent.energy)/4, this.moveEnergy, this, secondParent, childPosition, childType);
         this.aliveChildren += 1;
         secondParent.aliveChildren += 1;
         return child;

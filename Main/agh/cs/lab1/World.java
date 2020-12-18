@@ -10,11 +10,11 @@ public class World extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            int numberOfAnimals = 500;
+            int numberOfAnimals = 5;
             int startEnergy = 30;
             int moveEnergy = 1;
             int grassEnergy  = 20;
-            Vector2d upperRight = new Vector2d(50, 50);
+            Vector2d upperRight = new Vector2d(10, 10);
             float jungleRatio = 0.3f;
             SimulationEngine engine = new SimulationEngine(numberOfAnimals, stage, startEnergy, moveEnergy, grassEnergy, upperRight, jungleRatio);
             engine.run();

@@ -35,6 +35,10 @@ public class Statistics {
         return age;
     }
 
+    public Genotype getCurrentStrongestGenotype() {
+        return currentStrongestGenotype;
+    }
+
     public void countAverages(ArrayList<Animal> list) {
         this.age += 1;
         float averageEnergy = 0;
@@ -53,17 +57,14 @@ public class Statistics {
         }
         if (currentGenesMap.size() > 0) {
             //sortuję hashmapę genotypów po ilości ich występowania
-            //System.out.println(this.genesMap.toString());
             LinkedHashMap<Genotype, Integer> sortedGenes = this.currentGenesMap.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-            //System.out.println(sortedGenes.toString());
             Map.Entry<Genotype, Integer> entry = sortedGenes.entrySet().iterator().next();
-            if(entry.getValue() > this.strongestGenotypeAmount) {
-                this.currentStrongestGenotype = entry.getKey();
-                this.strongestGenotypeAmount = entry.getValue();
-            }
+            this.currentStrongestGenotype = entry.getKey();
+            this.strongestGenotypeAmount = entry.getValue();
+
             if(this.strongestGenesOfAllTime.get(this.currentStrongestGenotype) == null){
                 this.strongestGenesOfAllTime.put(this.currentStrongestGenotype, 1);
             }
