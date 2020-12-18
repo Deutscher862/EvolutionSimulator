@@ -1,7 +1,5 @@
 package agh.cs.lab1;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -14,6 +12,7 @@ public class MapVizualizerFX {
     private final Vector2d size;
     private final TorusMap map;
     private Text statistics;
+    protected boolean stop = false;
 
     public MapVizualizerFX(TorusMap map, int tileSize, Vector2d size, SimulationEngine engine) {
         this.root = new Pane();
@@ -23,7 +22,6 @@ public class MapVizualizerFX {
 
         for(int x = 0; x < this.size.x; x++){
             for( int y = 0; y < this.size.y; y++){
-                Color color;
                 Tile tile;
                 if (this.map.objectAt(new Vector2d(x, y)) instanceof Animal)
                     this.grid[x][y] = new Tile(tileSize, x, y, Color.BLACK);
@@ -43,7 +41,16 @@ public class MapVizualizerFX {
         startStopButton.setTranslateX(950);
         startStopButton.setTranslateY(400);
         startStopButton.setMinSize(100, 50);
-        startStopButton.setOnAction(event -> engine.pause());
+        startStopButton.setOnAction(event -> {
+            if(this.stop){
+                this.stop = false;
+                startStopButton.setText("Stop");
+            }
+            else{
+                this.stop = true;
+                startStopButton.setText("Start");
+            }
+        });
         this.root.getChildren().add(startStopButton);
     }
 
@@ -58,7 +65,7 @@ public class MapVizualizerFX {
                     int animalStartEnergy = ((Animal) object).getStartEnergy();
                     int animalEnergy = ((Animal) object).getEnergy();
                     if (animalEnergy >= animalStartEnergy*3/4)
-                        grid[i][j].setColor(Color.MAGENTA);
+                        grid[i][j].setColor(Color.BLACK);
                     else if(animalEnergy >= animalStartEnergy/2)
                         grid[i][j].setColor(Color.BROWN);
                     else if(animalEnergy >= animalStartEnergy/4)

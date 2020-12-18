@@ -10,7 +10,7 @@ public class World extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            int numberOfAnimals = 100;
+            int numberOfAnimals = 50;
             int startEnergy = 30;
             int moveEnergy = 1;
             int grassEnergy  = 20;

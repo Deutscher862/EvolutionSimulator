@@ -12,6 +12,7 @@ Następuje pętla, a w niej:
  */
 
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -50,30 +51,25 @@ public class SimulationEngine implements IEngine {
     @Override
     public void run() {
         //System.out.println(this.map.toString());
-        this.vizualizer.drawScene();
+
         new Thread (() ->{
             //this.vizualizer.refresh();
-            while(isOn) {
+            //XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+            while(!this.vizualizer.stop) {
                 newDay();
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 this.vizualizer.drawScene();
+                while(this.vizualizer.stop)
+                    System.out.println();
             }
         }).start();
         //System.out.println(this.map.toString());
         //System.out.println(this.map.stats.toString());
-    }
 
-    public void pause(){
-        if (isOn = true)
-            isOn = false;
-        else{
-            isOn = true;
-            run();
-        }
     }
 
     private void newDay(){

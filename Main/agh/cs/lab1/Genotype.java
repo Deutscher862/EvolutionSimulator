@@ -27,8 +27,12 @@ public class Genotype {
 
     @Override
     public String toString() {
-        return Arrays.toString(this.genes);
+        String result = "";
+        for(int gene : this.genes)
+            result = result + gene;
+        return result;
     }
+
 
     @Override
     public boolean equals(Object o) {
