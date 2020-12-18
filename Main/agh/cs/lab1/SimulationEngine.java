@@ -81,7 +81,7 @@ public class SimulationEngine implements IEngine {
         this.map.removeDeadAnimals();
         this.map.grassEating();
         this.map.reproduce();
-        this.map.stats.countAverages(this.map.getListOfAnimals());
+        this.map.stats.countAverages();
     }
 
     public Animal getSelectedAnimal() {

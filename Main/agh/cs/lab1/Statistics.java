@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Statistics {
+    private final TorusMap map;
     private int age = 0 ;
     private float totalSumOfAverageEnergy = 0;
     private int totalAverageNumberOfAnimals = 0;
@@ -11,7 +12,6 @@ public class Statistics {
     private final Map<Genotype, Integer> strongestGenesOfAllTime = new HashMap<>();
     private int totalAverageLifeLength = 0;
     private float totalAverageChildrenAmount = 0;
-    protected int numberOfGrass = 0;
     protected int numberOfAnimals = 0;
     protected int numberOfDeadAnimals = 0;
     protected float sumOfLifeLengths;
@@ -23,12 +23,16 @@ public class Statistics {
     private Genotype currentStrongestGenotype;
     private int strongestGenotypeAmount = 0;
 
+    public Statistics(TorusMap map) {
+        this.map = map;
+    }
+
     @Override
     public String toString() {
         return "Current Statistics:" +
                 "\nAge= " + age +
                 "\nAlive Animals= " + numberOfAnimals +
-                "\nPlants= " + numberOfGrass +
+                "\nPlants= " + this.map.getNumberOfGrass() +
                 "\nCurrent Strongest Genotype= " + currentStrongestGenotype +
                 "\nDead Animals= " + numberOfDeadAnimals +
                 "\nAverage Energy= \n" + averageEnergy +
@@ -44,12 +48,12 @@ public class Statistics {
         return currentStrongestGenotype;
     }
 
-    public void countAverages(ArrayList<Animal> list) {
+    public void countAverages() {
         this.age += 1;
         float averageEnergy = 0;
         float averageNumberOfChildren = 0;
-
-        for (Animal animal : list) {
+        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+        for (Animal animal : listOfAnimals) {
             averageEnergy += animal.getEnergy();
             averageNumberOfChildren += animal.getAliveChildren();
         }
@@ -76,7 +80,7 @@ public class Statistics {
             }
         }
         this.totalAverageNumberOfAnimals += this.numberOfAnimals;
-        this.totalAverageNumberOfGrass += this.numberOfGrass;
+        this.totalAverageNumberOfGrass += this.map.getNumberOfGrass();
 
         countAverageLifeLength();
     }

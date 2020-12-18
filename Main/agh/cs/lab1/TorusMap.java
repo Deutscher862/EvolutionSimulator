@@ -11,11 +11,12 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     private final Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
     private final MapVisualizer visualize = new MapVisualizer(this);
     private final int grassEnergy;
+    private int numberOfGrass;
     private final Vector2d lowerLeft = new Vector2d(0, 0);
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
     private final Vector2d jungleUpperRight;
-    public final Statistics stats = new Statistics();
+    public final Statistics stats = new Statistics(this);
 
     public TorusMap(Vector2d upperRight, int grassEnergy, float jungleRatio){
         this.upperRight = upperRight;
@@ -43,6 +44,10 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
 
     public Map<Vector2d, Grass> getMapOfGrass() {
         return mapOfGrass;
+    }
+
+    public int getNumberOfGrass() {
+        return numberOfGrass;
     }
 
     public String toString(){
@@ -124,7 +129,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             newPosition = savannahFreeSpace.get(rand.nextInt(savannahFreeSpace.size()));
             newGrass = new Grass(newPosition, this.grassEnergy);
             this.mapOfGrass.put(newPosition, newGrass);
-            this.stats.numberOfGrass += 1;
+            this.numberOfGrass += 1;
         }
 
         // w dżungli
@@ -133,7 +138,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             newPosition = jungleFreeSpace.get(rand.nextInt(jungleFreeSpace.size()));
             newGrass = new Grass(newPosition, this.grassEnergy);
             this.mapOfGrass.put(newPosition, newGrass);
-            this.stats.numberOfGrass += 1;
+            this.numberOfGrass += 1;
         }
     }
 
@@ -156,7 +161,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
                     list.get(i).eat(grass.getEnergy() / sameEnergyCounter);
                 }
                 //trawa znika z mapy
-                this.stats.numberOfGrass -= 1;
+                this.numberOfGrass -= 1;
                 iter.remove();
                 grass=null;
             }
