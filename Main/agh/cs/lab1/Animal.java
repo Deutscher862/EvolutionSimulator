@@ -12,7 +12,7 @@ public class Animal {
     private final Animal firstParent;
     private final Animal secondParent;
     private int lifeLength = 0;
-    private int deadAge = 0;
+    private int deadAge = -1;
     private int aliveChildren = 0;
     private final int startEnergy;
     private int energy;

@@ -113,7 +113,7 @@ public class Statistics {
 
     public String getStatisticsOfAllTime(){
         Map.Entry<Genotype, Integer> entry = getFirstHashMapElement(this.strongestGenesOfAllTime);
-        return "General Statisctics: "+
+        return "General Statistics: "+
                 "\nAverage Animals Number= " + this.totalAverageNumberOfAnimals/this.age +
                 "\nAverage Grass Number= " + this.totalAverageNumberOfGrass/this.age +
                 "\nStrongest Genotype= " + entry.getKey() +

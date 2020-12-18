@@ -1,35 +1,30 @@
 package agh.cs.lab1;
 
 import javafx.scene.control.Button;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
 public class MapVizualizerFX {
-    private final Tile[][] grid;
+    protected final Tile[][] grid;
     private final Pane root;
     private final Vector2d size;
     private final TorusMap map;
     private Text mapStatistics;
-    private Text animalStatistics;
+    protected Text animalStatistics;
     private Text generalStatistics;
-    protected boolean paused = false;
     private boolean showGeneralStatistics = false;
-    private Animal selectedAnimal = null;
-    private final Button followAnimal;
+    protected final Button followAnimal;
     private final Button startStopButton;
-    private int ageFollowNumber;
+    protected final SimulationEngine engine;
 
     public MapVizualizerFX(TorusMap map, int tileSize, Vector2d size, SimulationEngine engine) {
         this.root = new Pane();
         this.size = size;
         this.map = map;
         this.grid = new Tile[size.x][size.y];
+        this.engine = engine;
 
         //tworzę siatkę do wyświetalania pól
         for(int x = 0; x < this.size.x; x++){
@@ -60,8 +55,8 @@ public class MapVizualizerFX {
         //ogólne statystyki mapy
         this.generalStatistics = new Text();
         this.generalStatistics.setWrappingWidth(200);
-        this.generalStatistics.setTranslateX(850);
-        this.generalStatistics.setTranslateY((540));
+        this.generalStatistics.setTranslateX(1100);
+        this.generalStatistics.setTranslateY((30));
         this.generalStatistics.setFont(Font.font("Verdana", 15));
         this.root.getChildren().add(this.generalStatistics);
 
@@ -70,7 +65,7 @@ public class MapVizualizerFX {
         this.startStopButton.setTranslateX(1000);
         this.startStopButton.setTranslateY(750);
         this.startStopButton.setMinSize(100, 50);
-        this.startStopButton.setOnAction(event -> this.paused = !this.paused);
+        this.startStopButton.setOnAction(event -> this.engine.paused = !this.engine.paused);
         this.root.getChildren().add(this.startStopButton);
 
         //przycisk śledzenia zwierzęcia
@@ -79,7 +74,7 @@ public class MapVizualizerFX {
         this.followAnimal.setTranslateY(680);
         this.followAnimal.setMinSize(100, 50);
         this.followAnimal.setVisible(false);
-        this.followAnimal.setOnAction(event -> followAnimal());
+        this.followAnimal.setOnAction(event -> engine.followAnimal());
         this.root.getChildren().add(followAnimal);
 
         //przycisk wyświetlenia najsilniejszych zwierząt
@@ -87,7 +82,7 @@ public class MapVizualizerFX {
         selectStrongestGenotypeAnimals.setTranslateX(850);
         selectStrongestGenotypeAnimals.setTranslateY(680);
         selectStrongestGenotypeAnimals.setMinSize(100, 50);
-        selectStrongestGenotypeAnimals.setOnAction(event ->selectStrongestGenes());
+        selectStrongestGenotypeAnimals.setOnAction(event ->this.engine.selectStrongestGenes());
         this.root.getChildren().add(selectStrongestGenotypeAnimals);
 
         //przycisk do wyświetlania ogólnych statystyk
@@ -108,6 +103,14 @@ public class MapVizualizerFX {
             }
         });
         this.root.getChildren().add(showGeneralStatistics);
+
+        //przycisk do zapisania statystyk do pliku tekstowego
+        Button saveToFile = new Button("Save To File");
+        saveToFile.setTranslateX(1110);
+        saveToFile.setTranslateY(750);
+        saveToFile.setMinSize(100, 50);
+
+        this.root.getChildren().add(saveToFile);
     }
 
     public void drawScene(){
@@ -124,12 +127,12 @@ public class MapVizualizerFX {
         }
         this.followAnimal.setVisible(false);
         this.mapStatistics.setText(this.map.stats.toString());
-        if(this.selectedAnimal == null || this.selectedAnimal.getType() != AnimalType.SELECTED)
+        if(this.engine.getSelectedAnimal() == null || this.engine.getSelectedAnimal().getType() != AnimalType.SELECTED)
             this.animalStatistics.setText("");
         if(showGeneralStatistics){
             this.generalStatistics.setText(this.map.stats.getStatisticsOfAllTime());
         }
-        if(this.map.stats.getAge() == this.ageFollowNumber) countSelectedAnimalStatistics();
+        if(this.map.stats.getAge() == this.engine.getAgeFollowNumber()) this.animalStatistics.setText(this.engine.countSelectedAnimalStatistics());
     }
 
     public void fillAnimalTile(Animal animal){
@@ -147,69 +150,5 @@ public class MapVizualizerFX {
 
     public Pane getRoot() {
         return root;
-    }
-
-    public void selectStrongestGenes(){
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal animal : listOfAnimals){
-            if(animal.getGenes().equals(this.map.stats.getCurrentStrongestGenotype())){
-                Vector2d position = animal.getPosition();
-                grid[position.x][position.y].setColor(Color.YELLOW);
-            }
-        }
-    }
-
-    public void selectAnimal(Vector2d position) {
-        Object animal = this.map.objectAt(position);
-        if(this.paused && animal instanceof Animal){
-            if(this.selectedAnimal != null)
-                fillAnimalTile(this.selectedAnimal);
-            this.followAnimal.setVisible(true);
-            this.selectedAnimal = (Animal) animal;
-            grid[position.x][position.y].setColor(Color.MAGENTA);
-            this.animalStatistics.setText("Selected Animal Genotype= \n" + ((Animal) animal).getGenes().toString());
-        }
-    }
-
-    private void countSelectedAnimalStatistics() {
-        int countChildren = 0;
-        int countDescendants = 0;
-        String deadAt;
-        if(this.selectedAnimal.getDeadAge() == 0) deadAt = "-";
-        else deadAt = String.valueOf(this.selectedAnimal.getDeadAge());
-
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal animal : listOfAnimals){
-            if (animal.getType() == AnimalType.CHILD) {
-                countChildren += 1;
-                countDescendants += 1;
-            }
-            else if (animal.getType() == AnimalType.DESCENDANT) countDescendants += 1;
-        }
-        this.paused = true;
-
-        this.animalStatistics.setText( "Statistics After Following:" +
-                "\nGenotype= " + this.selectedAnimal.getGenes()+
-                "\nAlive Children= " + countChildren +
-                "\nAlive Descendants= " + countDescendants +
-                "\nDied At= " + this.selectedAnimal.getDeadAge());
-    }
-
-    public void followAnimal(){
-        TextInputDialog dialog = new TextInputDialog("100");
-        dialog.setTitle("Age Number Dialog");
-        dialog.setHeaderText("Enter a number of ages to follow the animal");
-        dialog.setContentText("Please enter a number:");
-        Optional<String> result = dialog.showAndWait();
-        //zapisuje epoke do której śledzić zwierzę
-        result.ifPresent(age -> this.ageFollowNumber = Integer.parseInt(age) + this.map.stats.getAge());
-
-        //ustawiam wszystkie zwierzęta na default
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal animal : listOfAnimals){
-            animal.type = AnimalType.DEFAULT;
-        }
-        this.selectedAnimal.type = AnimalType.SELECTED;
-        this.followAnimal.setVisible(false);
     }
 }

@@ -12,16 +12,21 @@ Następuje pętla, a w niej:
  */
 
 import javafx.scene.Scene;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class SimulationEngine implements IEngine {
     private TorusMap map;
     private final MapVizualizerFX vizualizer;
     private final float appMapSize = 800;
-    private final int appStatsSize = 400;
-    private boolean isOn = true;
+    private final int appStatsSize = 500;
+    private int ageFollowNumber;
+    protected boolean paused = false;
+    private Animal selectedAnimal = null;
 
     public SimulationEngine(int numberOfAnimals, Stage stage, int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, float jungleRatio) {
         this.map = new TorusMap(size, grassEnergy, jungleRatio);
@@ -52,7 +57,7 @@ public class SimulationEngine implements IEngine {
     @Override
     public void run() {
         new Thread (() ->{
-            while(!this.vizualizer.paused) {
+            while(!this.paused) {
                 newDay();
                 try {
                     Thread.sleep(100);
@@ -60,7 +65,7 @@ public class SimulationEngine implements IEngine {
                     e.printStackTrace();
                 }
                 this.vizualizer.drawScene();
-                while(this.vizualizer.paused)
+                while(this.paused)
                     Thread.onSpinWait();
             }
         }).start();
@@ -77,5 +82,79 @@ public class SimulationEngine implements IEngine {
         this.map.grassEating();
         this.map.reproduce();
         this.map.stats.countAverages(this.map.getListOfAnimals());
+    }
+
+    public Animal getSelectedAnimal() {
+        return selectedAnimal;
+    }
+
+    public int getAgeFollowNumber() {
+        return ageFollowNumber;
+    }
+
+    public void followAnimal(){
+        TextInputDialog dialog = new TextInputDialog("100");
+        dialog.setTitle("Age Number Dialog");
+        dialog.setHeaderText("Enter a number of ages to follow the animal");
+        dialog.setContentText("Please enter a number:");
+        Optional<String> result = dialog.showAndWait();
+        //zapisuje epoke do której śledzić zwierzę
+        result.ifPresent(age -> this.ageFollowNumber = Integer.parseInt(age) + this.map.stats.getAge());
+
+        //ustawiam wszystkie zwierzęta na default
+        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+        for(Animal animal : listOfAnimals){
+            animal.type = AnimalType.DEFAULT;
+        }
+        this.paused = false;
+        this.selectedAnimal.type = AnimalType.SELECTED;
+        this.vizualizer.followAnimal.setVisible(false);
+    }
+
+    public void selectAnimal(Vector2d position) {
+        Object animal = this.map.objectAt(position);
+        if(this.paused && animal instanceof Animal){
+            if(this.selectedAnimal != null)
+                this.vizualizer.fillAnimalTile(this.selectedAnimal);
+            this.vizualizer.followAnimal.setVisible(true);
+            this.selectedAnimal = (Animal) animal;
+            this.vizualizer.grid[position.x][position.y].setColor(Color.MAGENTA);
+            this.vizualizer.animalStatistics.setText("Selected Animal Genotype= \n" + ((Animal) animal).getGenes().toString());
+        }
+    }
+
+    public void selectStrongestGenes(){
+        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+        for(Animal animal : listOfAnimals){
+            if(animal.getGenes().equals(this.map.stats.getCurrentStrongestGenotype())){
+                Vector2d position = animal.getPosition();
+                this.vizualizer.grid[position.x][position.y].setColor(Color.YELLOW);
+            }
+        }
+    }
+
+    public String countSelectedAnimalStatistics() {
+        int countChildren = 0;
+        int countDescendants = 0;
+        String deadAt;
+        if(this.selectedAnimal.getDeadAge() == -1) deadAt = "-";
+        else deadAt = String.valueOf(this.selectedAnimal.getDeadAge());
+
+        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
+        for(Animal animal : listOfAnimals){
+            if (animal.getType() == AnimalType.CHILD) {
+                countChildren += 1;
+                countDescendants += 1;
+            }
+            else if (animal.getType() == AnimalType.DESCENDANT) countDescendants += 1;
+        }
+        this.selectedAnimal.type = AnimalType.DEFAULT;
+        this.paused = true;
+
+        return "Statistics After Following:" +
+                "\nGenotype= " + this.selectedAnimal.getGenes()+
+                "\nAlive Children= " + countChildren +
+                "\nAlive Descendants= " + countDescendants +
+                "\nDied At= " + deadAt;
     }
 }
