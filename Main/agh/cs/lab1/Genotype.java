@@ -1,7 +1,6 @@
 package agh.cs.lab1;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Random;
 
 public class Genotype {
@@ -32,7 +31,6 @@ public class Genotype {
             result = result + gene;
         return result;
     }
-
 
     @Override
     public boolean equals(Object o) {

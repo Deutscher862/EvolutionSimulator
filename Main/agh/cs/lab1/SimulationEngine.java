@@ -12,7 +12,6 @@ Następuje pętla, a w niej:
  */
 
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -31,10 +30,12 @@ public class SimulationEngine implements IEngine {
         if (numberOfAnimals > torusMapSize) numberOfAnimals = torusMapSize;
 
         for (int i = 0; i < numberOfAnimals; i++){
-            Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy);
+            Vector2d lowerLeft = new Vector2d(0, 0);
+            Vector2d newPosition = lowerLeft.randomVector(size);
             // jeśli pozycja na mapie jest już zajęta, generuje mu nowy wektor
-            while(this.map.getMapOfAnimals().get(newAnimal.getPosition()) != null)
-                newAnimal.generateNewPosition();
+            while(this.map.isOccupied(newPosition))
+                newPosition = lowerLeft.randomVector(size);
+            Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy, null, null, newPosition);
             this.map.place(newAnimal);
         }
         int tileSize;
@@ -50,15 +51,13 @@ public class SimulationEngine implements IEngine {
 
     @Override
     public void run() {
-        //System.out.println(this.map.toString());
-
         new Thread (() ->{
             //this.vizualizer.refresh();
             //XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
             while(!this.vizualizer.stop) {
                 newDay();
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -67,9 +66,6 @@ public class SimulationEngine implements IEngine {
                     System.out.println();
             }
         }).start();
-        //System.out.println(this.map.toString());
-        //System.out.println(this.map.stats.toString());
-
     }
 
     private void newDay(){

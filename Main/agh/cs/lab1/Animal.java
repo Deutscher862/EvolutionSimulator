@@ -19,33 +19,17 @@ public class Animal {
     private int aliveDescendants = 0;
     private boolean visited = false;
 
-    //konstruktor dla zwierząt stworzonych podczas rozmnażania
-    public Animal(TorusMap map, Animal strongerParent, Animal weakerParent, Vector2d position) {
+    public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position){
         this.map = map;
-        this.position = position;
-        this.firstParent = strongerParent;
-        this.secondParent = weakerParent;
-        this.genes = new Genotype(strongerParent.getGenes(), weakerParent.getGenes());
-        this.startEnergy = strongerParent.startEnergy;
-        this.energy = (strongerParent.getEnergy()+weakerParent.getEnergy())/4;
-        this.moveEnergy = strongerParent.getMoveEnergy();
-        //informAboutDescendant(false);
-    }
-
-    //konstruktor dla pierwszych zwierząt na mapie, bez rodziców
-    public Animal(TorusMap map, int startEnergy, int moveEnergy) {
-        this.map = map;
-        this.firstParent = null;
-        this.secondParent = null;
-        this.genes = new Genotype();
+        this.firstParent = firstParent;
+        this.secondParent = secondParent;
         this.startEnergy = startEnergy;
         this.energy = startEnergy;
         this.moveEnergy = moveEnergy;
-        this.position = this.map.getLowerLeft().randomVector(this.map.getUpperRight());
-        int rotate = this.genes.randomDirection();
-        for (int i = 0; i < rotate; i++){
-            this.orientation = this.orientation.next();
-        }
+        this.position = position;
+        if (firstParent == null)
+            this.genes = new Genotype();
+        else this.genes = new Genotype(firstParent.getGenes(), secondParent.getGenes());
     }
 
     public MapDirection getOrientation() {
@@ -102,7 +86,7 @@ public class Animal {
     public Animal reproduce(Animal secondParent, Vector2d childPosition){
         this.energy -= this.energy/4;
         secondParent.energy -= secondParent.energy/4;
-        Animal child = new Animal(this.map,this, secondParent, childPosition);
+        Animal child = new Animal(this.map,(this.energy+secondParent.energy)/4, this.moveEnergy, this, secondParent, childPosition);
         this.aliveChildren += 1;
         secondParent.aliveChildren += 1;
         return child;
