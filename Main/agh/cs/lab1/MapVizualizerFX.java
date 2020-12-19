@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.io.IOException;
+
 public class MapVizualizerFX {
     protected final Tile[][] grid;
     private final Pane root;
@@ -39,7 +41,7 @@ public class MapVizualizerFX {
         //aktulane statystyki mapy
         this.mapStatistics = new Text();
         this.mapStatistics.setWrappingWidth(200);
-        this.mapStatistics.setTranslateX(850);
+        this.mapStatistics.setTranslateX(820);
         this.mapStatistics.setTranslateY((30));
         this.mapStatistics.setFont(Font.font("Verdana", 15));
         this.root.getChildren().add(this.mapStatistics);
@@ -47,7 +49,7 @@ public class MapVizualizerFX {
         //statystyki poszczególnego zwierzęcia
         this.animalStatistics = new Text();
         this.animalStatistics.setWrappingWidth(200);
-        this.animalStatistics.setTranslateX(850);
+        this.animalStatistics.setTranslateX(820);
         this.animalStatistics.setTranslateY((340));
         this.animalStatistics.setFont(Font.font("Verdana", 15));
         this.root.getChildren().add(this.animalStatistics);
@@ -55,22 +57,22 @@ public class MapVizualizerFX {
         //ogólne statystyki mapy
         this.generalStatistics = new Text();
         this.generalStatistics.setWrappingWidth(200);
-        this.generalStatistics.setTranslateX(1100);
+        this.generalStatistics.setTranslateX(1070);
         this.generalStatistics.setTranslateY((30));
         this.generalStatistics.setFont(Font.font("Verdana", 15));
         this.root.getChildren().add(this.generalStatistics);
 
         //przycisk pauzy
         this.startStopButton = new Button("Start/Stop");
-        this.startStopButton.setTranslateX(1000);
+        this.startStopButton.setTranslateX(970);
         this.startStopButton.setTranslateY(750);
         this.startStopButton.setMinSize(100, 50);
         this.startStopButton.setOnAction(event -> this.engine.paused = !this.engine.paused);
         this.root.getChildren().add(this.startStopButton);
 
         //przycisk śledzenia zwierzęcia
-        this.followAnimal = new Button("Follow Selected Animal");
-        this.followAnimal.setTranslateX(1000);
+        this.followAnimal = new Button("Follow selected animal");
+        this.followAnimal.setTranslateX(970);
         this.followAnimal.setTranslateY(680);
         this.followAnimal.setMinSize(100, 50);
         this.followAnimal.setVisible(false);
@@ -78,39 +80,53 @@ public class MapVizualizerFX {
         this.root.getChildren().add(followAnimal);
 
         //przycisk wyświetlenia najsilniejszych zwierząt
-        Button selectStrongestGenotypeAnimals = new Button("Show Strongest Animals");
-        selectStrongestGenotypeAnimals.setTranslateX(850);
+        Button selectStrongestGenotypeAnimals = new Button("Show strongest animals");
+        selectStrongestGenotypeAnimals.setTranslateX(820);
         selectStrongestGenotypeAnimals.setTranslateY(680);
         selectStrongestGenotypeAnimals.setMinSize(100, 50);
         selectStrongestGenotypeAnimals.setOnAction(event ->this.engine.selectStrongestGenes());
         this.root.getChildren().add(selectStrongestGenotypeAnimals);
 
         //przycisk do wyświetlania ogólnych statystyk
-        Button showGeneralStatistics = new Button("Show General Statistics");
-        showGeneralStatistics.setTranslateX(850);
+        Button showGeneralStatistics = new Button("Show general statistics");
+        showGeneralStatistics.setTranslateX(820);
         showGeneralStatistics.setTranslateY(750);
         showGeneralStatistics.setMinSize(100, 50);
         showGeneralStatistics.setOnAction(event -> {
             if(this.showGeneralStatistics){
                 this.showGeneralStatistics = false;
-                showGeneralStatistics.setText("Show General Statistics");
+                showGeneralStatistics.setText("Show general statistics");
                 this.generalStatistics.setText("");
             }
             else{
                 this.showGeneralStatistics = true;
-                showGeneralStatistics.setText("Hide General Statistics");
+                showGeneralStatistics.setText("Hide general statistics");
                 this.generalStatistics.setText(this.map.stats.getStatisticsOfAllTime());
             }
         });
         this.root.getChildren().add(showGeneralStatistics);
 
         //przycisk do zapisania statystyk do pliku tekstowego
-        Button saveToFile = new Button("Save To File");
-        saveToFile.setTranslateX(1110);
-        saveToFile.setTranslateY(750);
-        saveToFile.setMinSize(100, 50);
+        Button saveExit = new Button("Save and exit");
+        saveExit.setTranslateX(1080);
+        saveExit.setTranslateY(750);
+        saveExit.setMinSize(100, 50);
+        saveExit.setOnAction(event -> {
+            try {
+                this.engine.saveAndExit();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        this.root.getChildren().add(saveExit);
 
-        this.root.getChildren().add(saveToFile);
+        //przycisk do wyłączenia symulacji
+        Button exit = new Button("Exit without saving");
+        exit.setTranslateX(1190);
+        exit.setTranslateY(750);
+        exit.setMinSize(100, 50);
+        exit.setOnAction(event -> this.engine.exit());
+        this.root.getChildren().add(exit);
     }
 
     public void drawScene(){
@@ -120,7 +136,9 @@ public class MapVizualizerFX {
                 Object object = this.map.objectAt(position);
                 this.grid[i][j].setColor(Color.LIGHTGREEN);
                 if(object instanceof Animal)
-                    fillAnimalTile((Animal) object);
+                    if (object.equals(this.engine.getSelectedAnimal()) && this.engine.getSelectedAnimal().getType() == AnimalType.SELECTED)
+                        this.grid[i][j].setColor(Color.MAGENTA);
+                    else fillAnimalTile((Animal) object);
                 else if(object instanceof Grass)
                     this.grid[i][j].setColor(Color.GREEN);
             }
@@ -128,7 +146,7 @@ public class MapVizualizerFX {
         this.followAnimal.setVisible(false);
         this.mapStatistics.setText(this.map.stats.toString());
         if(this.engine.getSelectedAnimal() == null || this.engine.getSelectedAnimal().getType() != AnimalType.SELECTED)
-            this.animalStatistics.setText("");
+            this.animalStatistics.setText("No animal is being followed");
         if(showGeneralStatistics){
             this.generalStatistics.setText(this.map.stats.getStatisticsOfAllTime());
         }

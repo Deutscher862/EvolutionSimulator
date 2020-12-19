@@ -16,11 +16,14 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
 public class SimulationEngine implements IEngine {
-    private TorusMap map;
+    private final TorusMap map;
+    private final Stage stage;
     private final MapVizualizerFX vizualizer;
     private final float appMapSize = 800;
     private final int appStatsSize = 500;
@@ -28,8 +31,9 @@ public class SimulationEngine implements IEngine {
     protected boolean paused = false;
     private Animal selectedAnimal = null;
 
-    public SimulationEngine(int numberOfAnimals, Stage stage, int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, float jungleRatio) {
+    public SimulationEngine(int numberOfAnimals, Stage stage, int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, double jungleRatio) {
         this.map = new TorusMap(size, grassEnergy, jungleRatio);
+        this.stage  =stage;
         //jeśli zwierząt jest więcej niż miejsc na mapie, zmniejszam ilość zwierząt
         int torusMapSize = (size.x)*(size.y);
         if (numberOfAnimals > torusMapSize) numberOfAnimals = torusMapSize;
@@ -156,5 +160,21 @@ public class SimulationEngine implements IEngine {
                 "\nAlive Children= " + countChildren +
                 "\nAlive Descendants= " + countDescendants +
                 "\nDied At= " + deadAt;
+    }
+
+    public void saveAndExit() throws IOException {
+        try{
+            FileWriter writer = new FileWriter("SimulationOutput.txt");
+            writer.write(this.map.stats.getStatisticsOfAllTime());
+            writer.close();
+            this.stage.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void exit() {
+        this.stage.close();
     }
 }
