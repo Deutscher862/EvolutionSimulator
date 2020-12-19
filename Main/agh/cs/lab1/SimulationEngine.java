@@ -33,7 +33,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     private final float appMapSize = 800;
     private final int appStatsSize = 500;
     private int ageFollowNumber;
-    protected boolean paused = false;
+    private boolean paused = false;
     private boolean ended = false;
     private Animal selectedAnimal = null;
 
@@ -282,5 +282,9 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     public void exit() {
         this.stage.close();
         this.ended = true;
+    }
+
+    public void pause() {
+        this.paused = !this.paused;
     }
 }

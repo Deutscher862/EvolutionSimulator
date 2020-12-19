@@ -3,8 +3,8 @@ package agh.cs.lab1;
 import java.util.Random;
 
 public class Vector2d {
-    final public int x;
-    final public int y;
+    public final int x;
+    public final int y;
     private final Random rand  = new Random();
 
     public Vector2d(int x, int y) {

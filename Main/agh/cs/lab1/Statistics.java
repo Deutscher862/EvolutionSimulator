@@ -12,9 +12,9 @@ public class Statistics {
     private final Map<Genotype, Integer> strongestGenesOfAllTime = new HashMap<>();
     private int totalAverageLifeLength = 0;
     private float totalAverageChildrenAmount = 0;
-    protected int numberOfAnimals = 0;
-    protected int numberOfDeadAnimals = 0;
-    protected float sumOfLifeLengths;
+    private int numberOfAnimals = 0;
+    private int numberOfDeadAnimals = 0;
+    private float sumOfLifeLengths;
     private float averageEnergy;
     private float averageLifeLength;
     private float averageNumberOfChildren;

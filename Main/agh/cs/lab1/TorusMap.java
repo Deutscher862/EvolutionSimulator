@@ -8,11 +8,11 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
     private final Map<Vector2d, List<Animal>> mapOfAnimals = new HashMap<>();
     private final Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
     private final int grassEnergy;
-    private int numberOfGrass;
     private final Vector2d lowerLeft = new Vector2d(0, 0);
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
     private final Vector2d jungleUpperRight;
+    private int numberOfGrass;
 
     public TorusMap(Vector2d upperRight, int grassEnergy, double jungleRatio){
         this.upperRight = upperRight;
@@ -72,7 +72,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
     }
 
     @Override
-    public boolean place(Animal animal) {
+    public void place(Animal animal) {
         if (this.mapOfAnimals.get(animal.getPosition()) == null){
             List<Animal> list = new ArrayList<>();
             list.add(animal);
@@ -85,7 +85,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
             list.sort(comparator);
         }
         animal.addObserver(this);
-        return true;
     }
 
     @Override

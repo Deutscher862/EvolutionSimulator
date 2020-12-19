@@ -8,7 +8,6 @@ public class Tile extends StackPane{
     private final int size;
     private final Rectangle rectangle;
     private final Vector2d position;
-    public Color color;
 
     public Tile(int size, Vector2d position, Color color, MapVizualizerFX vizualizerFX){
         this.size = size;
@@ -24,8 +23,7 @@ public class Tile extends StackPane{
     }
 
     public void setColor(Color color) {
-        this.color = color;
-        this.rectangle.setFill(this.color);
+        this.rectangle.setFill(color);
     }
 
 }

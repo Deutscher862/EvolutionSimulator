@@ -10,16 +10,16 @@ import java.io.IOException;
 
 public class MapVizualizerFX {
     protected final Tile[][] grid;
+    protected final Button followAnimal;
+    protected final SimulationEngine engine;
     private final Pane root;
     private final Vector2d size;
     private final TorusMap map;
-    private Text mapStatistics;
+    private final Button startStopButton;
     protected Text animalStatistics;
+    private Text mapStatistics;
     private Text generalStatistics;
     private boolean showGeneralStatistics = false;
-    protected final Button followAnimal;
-    private final Button startStopButton;
-    protected final SimulationEngine engine;
 
     public MapVizualizerFX(TorusMap map, int tileSize, Vector2d size, SimulationEngine engine) {
         this.root = new Pane();
@@ -28,7 +28,7 @@ public class MapVizualizerFX {
         this.grid = new Tile[size.x][size.y];
         this.engine = engine;
 
-        //tworzę siatkę do wyświetalania pól
+        //tworzę siatkę do wyświetlania pól
         for(int x = 0; x < this.size.x; x++){
             for( int y = 0; y < this.size.y; y++){
                 Tile tile;
@@ -38,7 +38,7 @@ public class MapVizualizerFX {
                 this.root.getChildren().add(this.grid[x][y]);
             }
         }
-        //aktulane statystyki mapy
+        //aktualne statystyki mapy
         this.mapStatistics = new Text();
         this.mapStatistics.setWrappingWidth(200);
         this.mapStatistics.setTranslateX(820);
@@ -62,12 +62,12 @@ public class MapVizualizerFX {
         this.generalStatistics.setFont(Font.font("Verdana", 15));
         this.root.getChildren().add(this.generalStatistics);
 
-        //przycisk pauzy
+        //przycisk pauzy/wznowienia
         this.startStopButton = new Button("Start/Stop");
         this.startStopButton.setTranslateX(970);
         this.startStopButton.setTranslateY(750);
         this.startStopButton.setMinSize(100, 50);
-        this.startStopButton.setOnAction(event -> this.engine.paused = !this.engine.paused);
+        this.startStopButton.setOnAction(event -> this.engine.pause());
         this.root.getChildren().add(this.startStopButton);
 
         //przycisk śledzenia zwierzęcia
@@ -130,6 +130,7 @@ public class MapVizualizerFX {
     }
 
     public void drawScene(){
+        //pętla kolorująca płytki
         for(int i = 0; i < this.size.x; i++){
             for(int j = 0; j < this.size.y; j++){
                 Vector2d position = new Vector2d(i, j);
@@ -143,6 +144,7 @@ public class MapVizualizerFX {
                     this.grid[i][j].setColor(Color.GREEN);
             }
         }
+        //aktualizowanie wyświetlanych statystyk
         this.followAnimal.setVisible(false);
         this.mapStatistics.setText(this.engine.getCurrentStatistics());
         if(this.engine.getSelectedAnimal() == null || this.engine.getSelectedAnimal().getType() != AnimalType.SELECTED)
@@ -154,6 +156,7 @@ public class MapVizualizerFX {
     }
 
     public void fillAnimalTile(Animal animal){
+        //kolorowanie płytki ze zwierzęciem w zależności od jego energii
         Vector2d position = animal.getPosition();
         int animalStartEnergy = animal.getStartEnergy();
         int animalEnergy = animal.getEnergy();

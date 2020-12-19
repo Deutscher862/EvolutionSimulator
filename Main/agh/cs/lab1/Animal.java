@@ -3,22 +3,22 @@ package agh.cs.lab1;
 import java.util.ArrayList;
 
 public class Animal {
-    private MapDirection orientation = MapDirection.NORTH;
-    private Vector2d position;
     private final TorusMap map;
     private final ArrayList<IEnergyRunOutObserver> observers = new ArrayList<>();
     private final ArrayList<Vector2d> positionHistory = new ArrayList<>();
     private final Genotype genes;
     private final Animal firstParent;
     private final Animal secondParent;
-    private int lifeLength = 0;
-    protected int deadAge = -1;
-    private int aliveChildren = 0;
     private final int startEnergy;
-    private int energy;
     private final int moveEnergy;
+    protected int deadAge = -1;
     //typ zwierzęcia - wykorzystywany podczas śledzenia jego historii
     protected AnimalType type;
+    private MapDirection orientation = MapDirection.NORTH;
+    private Vector2d position;
+    private int lifeLength = 0;
+    private int aliveChildren = 0;
+    private int energy;
 
     public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position, AnimalType type){
         this.map = map;
