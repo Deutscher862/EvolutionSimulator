@@ -101,7 +101,7 @@ public class MapVizualizerFX {
             else{
                 this.showGeneralStatistics = true;
                 showGeneralStatistics.setText("Hide general statistics");
-                this.generalStatistics.setText(this.map.stats.getStatisticsOfAllTime());
+                this.generalStatistics.setText(this.engine.getGeneralStatistics());
             }
         });
         this.root.getChildren().add(showGeneralStatistics);
@@ -144,13 +144,13 @@ public class MapVizualizerFX {
             }
         }
         this.followAnimal.setVisible(false);
-        this.mapStatistics.setText(this.map.stats.toString());
+        this.mapStatistics.setText(this.engine.getCurrentStatistics());
         if(this.engine.getSelectedAnimal() == null || this.engine.getSelectedAnimal().getType() != AnimalType.SELECTED)
             this.animalStatistics.setText("No animal is being followed");
         if(showGeneralStatistics){
-            this.generalStatistics.setText(this.map.stats.getStatisticsOfAllTime());
+            this.generalStatistics.setText(this.engine.getGeneralStatistics());
         }
-        if(this.map.stats.getAge() == this.engine.getAgeFollowNumber()) this.animalStatistics.setText(this.engine.countSelectedAnimalStatistics());
+        if(this.engine.getAge() == this.engine.getAgeFollowNumber()) this.animalStatistics.setText(this.engine.countSelectedAnimalStatistics());
     }
 
     public void fillAnimalTile(Animal animal){

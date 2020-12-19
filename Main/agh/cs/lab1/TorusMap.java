@@ -2,21 +2,17 @@ package agh.cs.lab1;
 
 import java.util.*;
 
-public class TorusMap implements IWorldMap, IPositionChangeObserver {
+public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunOutObserver {
     private final Random rand  = new Random();
-    private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
-    private final ArrayList<Animal> animalsToRemove = new ArrayList<>();
     private final Comparator<Animal> comparator = new EnergyCompare();
-    protected final Map<Vector2d, List<Animal>> mapOfAnimals = new HashMap<>();
+    private final Map<Vector2d, List<Animal>> mapOfAnimals = new HashMap<>();
     private final Map<Vector2d,Grass> mapOfGrass = new HashMap<>();
-    private final MapVisualizer visualize = new MapVisualizer(this);
     private final int grassEnergy;
     private int numberOfGrass;
     private final Vector2d lowerLeft = new Vector2d(0, 0);
     private final Vector2d upperRight;
     private final Vector2d jungleLowerLeft;
     private final Vector2d jungleUpperRight;
-    public final Statistics stats = new Statistics(this);
 
     public TorusMap(Vector2d upperRight, int grassEnergy, double jungleRatio){
         this.upperRight = upperRight;
@@ -36,8 +32,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         return lowerLeft;
     }
 
-    public ArrayList<Animal> getListOfAnimals() { return listOfAnimals; }
-
     public Map<Vector2d, List<Animal>> getMapOfAnimals() {
         return mapOfAnimals;
     }
@@ -48,10 +42,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
 
     public int getNumberOfGrass() {
         return numberOfGrass;
-    }
-
-    public String toString(){
-        return this.visualize.draw(this.lowerLeft, this.upperRight);
     }
 
     //zwraca true, jeśli podany wektor jest w dżungli
@@ -82,11 +72,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
     }
 
     @Override
-    public boolean canMoveTo(Vector2d position) {
-        return false;
-    }
-
-    @Override
     public boolean place(Animal animal) {
         if (this.mapOfAnimals.get(animal.getPosition()) == null){
             List<Animal> list = new ArrayList<>();
@@ -99,9 +84,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
             list.add(animal);
             list.sort(comparator);
         }
-        this.stats.addToHashmap(animal);
         animal.addObserver(this);
-        listOfAnimals.add(animal);
         return true;
     }
 
@@ -168,77 +151,6 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         }
     }
 
-    public void reproduce(){
-        //iteruję po wszystkich polach z mapy, na których znajdują się zwierzęta
-        ArrayList<Animal> childrenToPlace = new ArrayList<>();
-        for (Map.Entry<Vector2d, List<Animal>> vector2dListEntry : this.mapOfAnimals.entrySet()) {
-            List<Animal> currentList = vector2dListEntry.getValue();
-            if (currentList.size() >= 2) {
-                Animal strongerParent;
-                Animal weakerParent;
-                //wybieranie rodziców
-                int j = 1;
-                while (j < currentList.size() && currentList.get(j).getEnergy() == currentList.get(0).getEnergy())
-                    j += 1;
-                if (j == 1) {
-                    strongerParent = currentList.get(0);
-                    int k = 2;
-                    while (k < currentList.size() && currentList.get(k).getEnergy() == currentList.get(1).getEnergy())
-                        k += 1;
-                    if (k == 2) weakerParent = currentList.get(1);
-                    else {
-                        weakerParent = currentList.get(rand.nextInt(k - 1) + 1);
-                    }
-                } else {
-                    strongerParent = currentList.get(rand.nextInt(j));
-                    weakerParent = currentList.get(rand.nextInt(j));
-                    while (strongerParent.equals(weakerParent))
-                        weakerParent = currentList.get(rand.nextInt(j));
-                }
-
-                //sprawdzam czy zwierzęta mają wystarczająco dużo energii do rozmnażania
-                if (strongerParent.getEnergy() > strongerParent.getStartEnergy() / 2 && weakerParent.getEnergy() > weakerParent.getStartEnergy() / 2) {
-                    //szukam czy dookoła rodziców jest jakieś wolne pole
-                    ArrayList<Vector2d> freeSpace = new ArrayList<>();
-                    Vector2d nearestPosition;
-                    MapDirection lookForFreeSpace = strongerParent.getOrientation();
-                    for (int i = 0; i < 8; i++) {
-                        nearestPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(getUpperRight());
-                        if (!isOccupied(nearestPosition)) {
-                            freeSpace.add(nearestPosition);
-                        }
-                        lookForFreeSpace = lookForFreeSpace.next();
-                    }
-                    //jeśli istnieje jakieś puste miejsce, to je losuję i dodaję do metody reproduce
-                    Vector2d childPosition;
-                    if (freeSpace.size() > 0)
-                        childPosition = freeSpace.get(rand.nextInt(freeSpace.size()));
-                        //jeśli nie, to losuje zajęte miejsce
-                    else {
-                        int spin = rand.nextInt(8);
-                        for (int i = 0; i < spin; i++)
-                            lookForFreeSpace = lookForFreeSpace.next();
-                        childPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(getUpperRight());
-                    }
-                    Animal child = strongerParent.reproduce(weakerParent, childPosition);
-                    childrenToPlace.add(child);
-                }
-            }
-        }
-        //gdy wszystkie dzieci zostają stworzone, dodaję je do mapy
-        for(Animal child : childrenToPlace) this.place(child);
-    }
-
-    public void removeDeadAnimals() {
-        //usuwam wszystkie martwe zwierzęta z mapy
-        for(Animal animal : this.animalsToRemove){
-            this.listOfAnimals.remove(animal);
-            this.stats.removeFromHashmap(animal);
-            animal = null;
-        }
-        this.animalsToRemove.clear();
-    }
-
     @Override
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition, Animal animalToMove) {
         //usuwam zwierzę z hashmapy na starym polu
@@ -274,6 +186,5 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver {
         if (list.size() == 0) this.mapOfAnimals.remove(animal.getPosition());
         //ponieważ martwe zwierzę wykonuje ruch w SimulationEngine, nie mogę usunąc go z listy zwierząt
         // zapisuję je więc do listy zwierząt do usunięcia, którą wywołam po zakończenia ruchu zwierzęcia
-        this.animalsToRemove.add(animal);
     }
 }

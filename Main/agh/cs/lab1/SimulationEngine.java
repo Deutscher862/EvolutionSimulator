@@ -18,22 +18,30 @@ import javafx.stage.Stage;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
-public class SimulationEngine implements IEngine {
+public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     private final TorusMap map;
     private final Stage stage;
+    private final int stageNumber;
+    private final Statistics statistics;
+    private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
+    private final ArrayList<Animal> animalsToRemove = new ArrayList<>();
+    private final Random rand = new Random();
+    private int age = 0;
     private final MapVizualizerFX vizualizer;
     private final float appMapSize = 800;
     private final int appStatsSize = 500;
     private int ageFollowNumber;
     protected boolean paused = false;
+    private boolean ended = false;
     private Animal selectedAnimal = null;
 
-    public SimulationEngine(int numberOfAnimals, Stage stage, int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, double jungleRatio) {
+    public SimulationEngine(int numberOfAnimals, Stage stage, int stageNumber,  int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, double jungleRatio) {
         this.map = new TorusMap(size, grassEnergy, jungleRatio);
-        this.stage  =stage;
+        this.stage = stage;
+        this.stageNumber = stageNumber;
+        this.statistics = new Statistics(this.map);
         //jeśli zwierząt jest więcej niż miejsc na mapie, zmniejszam ilość zwierząt
         int torusMapSize = (size.x)*(size.y);
         if (numberOfAnimals > torusMapSize) numberOfAnimals = torusMapSize;
@@ -46,6 +54,9 @@ public class SimulationEngine implements IEngine {
                 newPosition = lowerLeft.randomVector(size);
             Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy, null, null, newPosition, AnimalType.DEFAULT);
             this.map.place(newAnimal);
+            newAnimal.addObserver(this);
+            this.listOfAnimals.add(newAnimal);
+            this.statistics.addToHashmap(newAnimal);
         }
         int tileSize;
         if(size.x < size.y){
@@ -61,7 +72,8 @@ public class SimulationEngine implements IEngine {
     @Override
     public void run() {
         new Thread (() ->{
-            while(!this.paused) {
+            while(!this.paused && !this.ended) {
+                this.age += 1;
                 newDay();
                 try {
                     Thread.sleep(100);
@@ -78,14 +90,95 @@ public class SimulationEngine implements IEngine {
     private void newDay(){
         this.map.growGrass();
         //poruszam zwierzętami z mapy
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal currentAnimal : listOfAnimals){
+        for(Animal currentAnimal : this.listOfAnimals){
             currentAnimal.move();
         }
-        this.map.removeDeadAnimals();
+        this.removeDeadAnimals();
         this.map.grassEating();
-        this.map.reproduce();
-        this.map.stats.countAverages();
+        this.reproduce();
+        this.statistics.countAverages(this.listOfAnimals);
+    }
+
+    public void reproduce(){
+        //iteruję po wszystkich polach z mapy, na których znajdują się zwierzęta
+        ArrayList<Animal> childrenToPlace = new ArrayList<>();
+        for (Map.Entry<Vector2d, List<Animal>> vector2dListEntry : this.map.getMapOfAnimals().entrySet()) {
+            List<Animal> currentList = vector2dListEntry.getValue();
+            if (currentList.size() >= 2) {
+                Animal strongerParent;
+                Animal weakerParent;
+                //wybieranie rodziców
+                int j = 1;
+                while (j < currentList.size() && currentList.get(j).getEnergy() == currentList.get(0).getEnergy())
+                    j += 1;
+                if (j == 1) {
+                    strongerParent = currentList.get(0);
+                    int k = 2;
+                    while (k < currentList.size() && currentList.get(k).getEnergy() == currentList.get(1).getEnergy())
+                        k += 1;
+                    if (k == 2) weakerParent = currentList.get(1);
+                    else {
+                        weakerParent = currentList.get(rand.nextInt(k - 1) + 1);
+                    }
+                } else {
+                    strongerParent = currentList.get(rand.nextInt(j));
+                    weakerParent = currentList.get(rand.nextInt(j));
+                    while (strongerParent.equals(weakerParent))
+                        weakerParent = currentList.get(rand.nextInt(j));
+                }
+
+                //sprawdzam czy zwierzęta mają wystarczająco dużo energii do rozmnażania
+                if (strongerParent.getEnergy() > strongerParent.getStartEnergy() / 2 && weakerParent.getEnergy() > weakerParent.getStartEnergy() / 2) {
+                    //szukam czy dookoła rodziców jest jakieś wolne pole
+                    ArrayList<Vector2d> freeSpace = new ArrayList<>();
+                    Vector2d nearestPosition;
+                    MapDirection lookForFreeSpace = strongerParent.getOrientation();
+                    for (int i = 0; i < 8; i++) {
+                        nearestPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(this.map.getUpperRight());
+                        if (!this.map.isOccupied(nearestPosition)) {
+                            freeSpace.add(nearestPosition);
+                        }
+                        lookForFreeSpace = lookForFreeSpace.next();
+                    }
+                    //jeśli istnieje jakieś puste miejsce, to je losuję i dodaję do metody reproduce
+                    Vector2d childPosition;
+                    if (freeSpace.size() > 0)
+                        childPosition = freeSpace.get(rand.nextInt(freeSpace.size()));
+                        //jeśli nie, to losuje zajęte miejsce
+                    else {
+                        int spin = rand.nextInt(8);
+                        for (int i = 0; i < spin; i++)
+                            lookForFreeSpace = lookForFreeSpace.next();
+                        childPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(this.map.getUpperRight());
+                    }
+                    Animal child = strongerParent.reproduce(weakerParent, childPosition);
+                    childrenToPlace.add(child);
+                }
+            }
+        }
+        //gdy wszystkie dzieci zostają stworzone, dodaję je do mapy
+        for(Animal child : childrenToPlace) {
+            this.map.place(child);
+            child.addObserver(this);
+            this.listOfAnimals.add(child);
+            this.statistics.addToHashmap(child);
+        }
+    }
+
+    @Override
+    public void EnergyRunOut(Animal animal) {
+        animal.deadAge = this.statistics.getAge();
+        this.animalsToRemove.add(animal);
+    }
+
+    public void removeDeadAnimals() {
+        //usuwam wszystkie martwe zwierzęta z symulacji
+        for(Animal animal : this.animalsToRemove){
+            this.listOfAnimals.remove(animal);
+            this.statistics.removeFromHashmap(animal);
+            animal = null;
+        }
+        this.animalsToRemove.clear();
     }
 
     public Animal getSelectedAnimal() {
@@ -96,6 +189,10 @@ public class SimulationEngine implements IEngine {
         return ageFollowNumber;
     }
 
+    public int getAge() {
+        return age;
+    }
+
     public void followAnimal(){
         TextInputDialog dialog = new TextInputDialog("100");
         dialog.setTitle("Age Number Dialog");
@@ -103,11 +200,10 @@ public class SimulationEngine implements IEngine {
         dialog.setContentText("Please enter a number:");
         Optional<String> result = dialog.showAndWait();
         //zapisuje epoke do której śledzić zwierzę
-        result.ifPresent(age -> this.ageFollowNumber = Integer.parseInt(age) + this.map.stats.getAge());
+        result.ifPresent(age -> this.ageFollowNumber = Integer.parseInt(age) + this.statistics.getAge());
 
         //ustawiam wszystkie zwierzęta na default
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal animal : listOfAnimals){
+        for(Animal animal : this.listOfAnimals){
             animal.type = AnimalType.DEFAULT;
         }
         this.paused = false;
@@ -128,9 +224,9 @@ public class SimulationEngine implements IEngine {
     }
 
     public void selectStrongestGenes(){
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal animal : listOfAnimals){
-            if(animal.getGenes().equals(this.map.stats.getCurrentStrongestGenotype())){
+        //metoda szukająca zwierząt o najsilniejszym genotypie
+        for(Animal animal : this.listOfAnimals){
+            if(animal.getGenes().equals(this.statistics.getCurrentStrongestGenotype())){
                 Vector2d position = animal.getPosition();
                 this.vizualizer.grid[position.x][position.y].setColor(Color.YELLOW);
             }
@@ -138,14 +234,14 @@ public class SimulationEngine implements IEngine {
     }
 
     public String countSelectedAnimalStatistics() {
+        //metoda licząca statystyki po skończeniu śledzenia zwierzęcia
         int countChildren = 0;
         int countDescendants = 0;
         String deadAt;
         if(this.selectedAnimal.getDeadAge() == -1) deadAt = "-";
         else deadAt = String.valueOf(this.selectedAnimal.getDeadAge());
 
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
-        for(Animal animal : listOfAnimals){
+        for(Animal animal : this.listOfAnimals){
             if (animal.getType() == AnimalType.CHILD) {
                 countChildren += 1;
                 countDescendants += 1;
@@ -162,19 +258,29 @@ public class SimulationEngine implements IEngine {
                 "\nDied At= " + deadAt;
     }
 
+    public String getCurrentStatistics(){
+        return this.statistics.toString();
+    }
+
+    public String getGeneralStatistics(){
+        return this.statistics.getStatisticsOfAllTime();
+    }
+
     public void saveAndExit() throws IOException {
         try{
-            FileWriter writer = new FileWriter("SimulationOutput.txt");
-            writer.write(this.map.stats.getStatisticsOfAllTime());
+            FileWriter writer = new FileWriter("SimulationOutput" + this.stageNumber + ".txt");
+            writer.write(this.statistics.getStatisticsOfAllTime());
             writer.close();
             this.stage.close();
+            this.ended = true;
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void exit() {
         this.stage.close();
+        this.ended = true;
     }
 }

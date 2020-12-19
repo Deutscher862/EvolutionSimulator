@@ -6,17 +6,18 @@ public class Animal {
     private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
     private final TorusMap map;
-    private final ArrayList<IPositionChangeObserver> observers = new ArrayList<>();
+    private final ArrayList<IEnergyRunOutObserver> observers = new ArrayList<>();
     private final ArrayList<Vector2d> positionHistory = new ArrayList<>();
     private final Genotype genes;
     private final Animal firstParent;
     private final Animal secondParent;
     private int lifeLength = 0;
-    private int deadAge = -1;
+    protected int deadAge = -1;
     private int aliveChildren = 0;
     private final int startEnergy;
     private int energy;
     private final int moveEnergy;
+    //typ zwierzęcia - wykorzystywany podczas śledzenia jego historii
     protected AnimalType type;
 
     public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position, AnimalType type){
@@ -79,13 +80,12 @@ public class Animal {
         this.lifeLength += 1;
         this.map.positionChanged(oldPosition, this.position, this);
         if(this.energy <= 0) {
-            //gdy zwierzę umarło przekazuję informację o tym do mapy i wszystkich przodków
-            this.map.EnergyRunOut(this);
+            //gdy zwierzę umarło przekazuję informację o tym do mapy, engine i wszystkich przodków
+            informAboutDeath();
             if(this.firstParent != null)
                 this.firstParent.aliveChildren -= 1;
             if(this.secondParent != null)
                 this.secondParent.aliveChildren -= 1;
-            this.deadAge = this.map.stats.getAge();
         }
     }
 
@@ -106,8 +106,14 @@ public class Animal {
         return child;
     }
 
-    public void addObserver(IPositionChangeObserver observer){
+    public void addObserver(IEnergyRunOutObserver observer){
         this.observers.add(observer);
+    }
+
+    public void informAboutDeath(){
+        for(IEnergyRunOutObserver observer : this.observers){
+            observer.EnergyRunOut(this);
+        }
     }
 
     public void generateNewPosition() {

@@ -25,7 +25,7 @@ public class World extends Application {
             int numberOfSimulations = 1;
             for(int i = 0; i <numberOfSimulations; i++){
                 Stage stage2 = new Stage();
-                IEngine engine = new SimulationEngine(numberOfAnimals, stage2, startEnergy, moveEnergy, grassEnergy, mapSize, jungleRatio);
+                IEngine engine = new SimulationEngine(numberOfAnimals, stage2, i, startEnergy, moveEnergy, grassEnergy, mapSize, jungleRatio);
                 engine.run();
             }
 

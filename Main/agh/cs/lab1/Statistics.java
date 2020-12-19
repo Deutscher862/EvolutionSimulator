@@ -48,11 +48,10 @@ public class Statistics {
         return currentStrongestGenotype;
     }
 
-    public void countAverages() {
+    public void countAverages(ArrayList<Animal> listOfAnimals) {
         this.age += 1;
         float averageEnergy = 0;
         float averageNumberOfChildren = 0;
-        ArrayList<Animal> listOfAnimals = this.map.getListOfAnimals();
         for (Animal animal : listOfAnimals) {
             averageEnergy += animal.getEnergy();
             averageNumberOfChildren += animal.getAliveChildren();
