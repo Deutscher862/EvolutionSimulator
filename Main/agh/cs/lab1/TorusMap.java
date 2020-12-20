@@ -14,11 +14,11 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
     private final Vector2d jungleUpperRight;
     private int numberOfGrass;
 
-    public TorusMap(Vector2d upperRight, int grassEnergy, double jungleRatio){
+    public TorusMap(Vector2d upperRight, int grassEnergy, float jungleRatio){
         this.upperRight = upperRight;
         this.grassEnergy = grassEnergy;
-        int jungleWidth = (int) Math.round(upperRight.x * jungleRatio);
-        int jungleHeight = (int) Math.round(upperRight.y * jungleRatio);
+        int jungleWidth = Math.round(upperRight.x * jungleRatio);
+        int jungleHeight = Math.round(upperRight.y * jungleRatio);
 
         this.jungleLowerLeft = new Vector2d(upperRight.x/2-jungleWidth/2, upperRight.y/2-jungleHeight/2);
         this.jungleUpperRight = new Vector2d(this.jungleLowerLeft.x+jungleWidth, this.jungleLowerLeft.y+jungleHeight);

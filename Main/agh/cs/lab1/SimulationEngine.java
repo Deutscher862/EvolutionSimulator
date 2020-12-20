@@ -13,6 +13,8 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     private final TorusMap map;
     private final Stage stage;
     private final int stageNumber;
+    private final int numberOfAges;
+    private final int refreshTime;
     private final Statistics statistics;
     private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
     private final ArrayList<Animal> animalsToRemove = new ArrayList<>();
@@ -25,10 +27,12 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     private boolean ended = false;
     private Animal selectedAnimal = null;
 
-    public SimulationEngine(int numberOfAnimals, Stage stage, int stageNumber,  int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, double jungleRatio) {
+    public SimulationEngine(int numberOfAnimals, Stage stage, int stageNumber,  int startEnergy, int moveEnergy, int grassEnergy, Vector2d size, float jungleRatio, int numberOfAges, int refreshTime) {
         this.map = new TorusMap(size, grassEnergy, jungleRatio);
         this.stage = stage;
         this.stageNumber = stageNumber;
+        this.numberOfAges = numberOfAges;
+        this.refreshTime = refreshTime;
         this.statistics = new Statistics(this.map);
         //jeśli zwierząt jest więcej niż miejsc na mapie, zmniejszam ilość zwierząt
         int torusMapSize = (size.x)*(size.y);
@@ -82,10 +86,10 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     public void run() {
         //główna pętla obsługująca symulację
         new Thread (() ->{
-            while(!this.ended) {
+            while(!this.ended && this.numberOfAges > this.statistics.getAge()) {
                 newDay();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(this.refreshTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

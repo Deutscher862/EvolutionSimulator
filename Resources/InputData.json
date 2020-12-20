@@ -5,5 +5,8 @@
     "moveEnergy": "1",
     "plantEnergy": "10",
     "jungleRatio": "0.3",
-    "numberOfAnimals": "10"
+    "numberOfAnimals": "10",
+    "numberOfSimulations": "1",
+    "numberOfAges": "1000",
+    "refreshTime": "100"
 }
