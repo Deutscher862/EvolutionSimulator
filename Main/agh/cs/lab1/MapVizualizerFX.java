@@ -9,14 +9,14 @@ import javafx.scene.text.Text;
 import java.io.IOException;
 
 public class MapVizualizerFX {
-    protected final Tile[][] grid;
-    protected final Button followAnimal;
-    protected final SimulationEngine engine;
+    private final Tile[][] grid;
+    private final Button followAnimal;
+    private final SimulationEngine engine;
     private final Pane root;
     private final Vector2d size;
     private final TorusMap map;
     private final Button startStopButton;
-    protected Text animalStatistics;
+    private Text animalStatistics;
     private Text mapStatistics;
     private Text generalStatistics;
     private boolean showGeneralStatistics = false;
@@ -133,6 +133,14 @@ public class MapVizualizerFX {
         this.grid[position.x][position.y].setColor(color);
     }
 
+    public void setAnimalStatistics(String animalStatistics) {
+        this.animalStatistics.setText(animalStatistics);
+    }
+
+    public void setFollowAnimalVisibility(){
+        this.followAnimal.setVisible(!this.followAnimal.isVisible());
+    }
+
     public Pane getRoot() {
         return root;
     }
@@ -172,9 +180,13 @@ public class MapVizualizerFX {
         if (animalEnergy >= animalStartEnergy*3/4)
             setTileColor(position, Color.BLACK);
         else if(animalEnergy >= animalStartEnergy/2)
-            setTileColor(position, Color.BROWN);
+            setTileColor(position, Color.DARKGRAY);
         else if(animalEnergy >= animalStartEnergy/4)
             setTileColor(position, Color.GRAY);
         else setTileColor(position, Color.LIGHTGRAY);
+    }
+
+    public void selectAnimal(Vector2d position) {
+        this.engine.selectAnimal(position);
     }
 }

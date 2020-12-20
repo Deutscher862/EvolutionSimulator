@@ -11,7 +11,7 @@ public class Animal {
     private final Animal secondParent;
     private final int startEnergy;
     private final int moveEnergy;
-    protected int deadAge = -1;
+    private int deadAge = -1;
     //typ zwierzęcia - wykorzystywany podczas śledzenia jego historii
     private AnimalType type;
     private MapDirection orientation = MapDirection.NORTH;
@@ -83,7 +83,7 @@ public class Animal {
         Vector2d oldPosition = this.position;
         Vector2d newPosition = this.position.add(this.orientation.toUnitVector());
         //dzięki metodzie getBackToMap zwierzę zawsze zostaje na mapie
-        this.position = newPosition.getBackToMap(this.map.getUpperRight());
+        this.position = newPosition.goBackToMap(this.map.getUpperRight());
 
         this.energy -= this.moveEnergy;
         this.lifeLength += 1;
@@ -125,7 +125,7 @@ public class Animal {
         this.observers.add(observer);
     }
 
-    public void informAboutDeath(){
+    private void informAboutDeath(){
         for(IEnergyRunOutObserver observer : this.observers){
             observer.EnergyRunOut(this);
         }

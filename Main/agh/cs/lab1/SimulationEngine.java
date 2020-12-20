@@ -108,7 +108,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         this.statistics.countAverages(this.listOfAnimals);
     }
 
-    public void reproduce(){
+    private void reproduce(){
         //iteruję po wszystkich polach z mapy, na których znajdują się zwierzęta
         ArrayList<Animal> childrenToPlace = new ArrayList<>();
         for (Map.Entry<Vector2d, List<Animal>> vector2dListEntry : this.map.getMapOfAnimals().entrySet()) {
@@ -144,7 +144,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
                     Vector2d nearestPosition;
                     MapDirection lookForFreeSpace = strongerParent.getOrientation();
                     for (int i = 0; i < 8; i++) {
-                        nearestPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(this.map.getUpperRight());
+                        nearestPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).goBackToMap(this.map.getUpperRight());
                         if (!this.map.isOccupied(nearestPosition)) {
                             //wszystkie sąsiednie puste pola dodaję do listy
                             freeSpace.add(nearestPosition);
@@ -160,7 +160,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
                         int spin = rand.nextInt(8);
                         for (int i = 0; i < spin; i++)
                             lookForFreeSpace = lookForFreeSpace.next();
-                        childPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(this.map.getUpperRight());
+                        childPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).goBackToMap(this.map.getUpperRight());
                     }
                     //tworzę nowe dziecko, przekazując mu rodziców i pozycję na mapie
                     Animal child = strongerParent.reproduce(weakerParent, childPosition);
@@ -183,7 +183,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         this.animalsToRemove.add(animal);
     }
 
-    public void removeDeadAnimals() {
+    private void removeDeadAnimals() {
         //usuwam wszystkie martwe zwierzęta z symulacji
         for(Animal animal : this.animalsToRemove){
             this.listOfAnimals.remove(animal);
@@ -193,7 +193,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         this.animalsToRemove.clear();
     }
 
-    public void followAnimal(){
+    protected void followAnimal(){
         //metoda rozpoczynąjąca proces śledzenia historii zwierzęcia
         TextInputDialog dialog = new TextInputDialog("100");
         dialog.setTitle("Age Number Dialog");
@@ -209,24 +209,24 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         }
         this.paused = false;
         this.selectedAnimal.setType(AnimalType.SELECTED);
-        this.vizualizer.followAnimal.setVisible(false);
+        this.vizualizer.setFollowAnimalVisibility();
     }
 
-    public void selectAnimal(Vector2d position) {
+    protected void selectAnimal(Vector2d position) {
         //metoda uruchamiana w momencie kliknięcia na konkretne zwierzę w wizualizacji
         Object animal = this.map.objectAt(position);
         if(this.paused && animal instanceof Animal){
             if(this.selectedAnimal != null)
                 this.vizualizer.fillAnimalTile(this.selectedAnimal);
             //po wybraniu zwierzęcia przycisk śledzenia staje się widoczny
-            this.vizualizer.followAnimal.setVisible(true);
+            this.vizualizer.setFollowAnimalVisibility();
             this.selectedAnimal = (Animal) animal;
-            this.vizualizer.grid[position.x][position.y].setColor(Color.MAGENTA);
-            this.vizualizer.animalStatistics.setText("Selected Animal Genotype= \n" + ((Animal) animal).getGenes().toString());
+            this.vizualizer.setTileColor(position, Color.MAGENTA);
+            this.vizualizer.setAnimalStatistics("Selected Animal Genotype= \n" + ((Animal) animal).getGenes().toString());
         }
     }
 
-    public void selectStrongestGenes(){
+    protected void selectStrongestGenes(){
         //metoda szukająca zwierząt o najsilniejszym genotypie
         for(Animal animal : this.listOfAnimals){
             if(animal.getGenes().equals(this.statistics.getCurrentStrongestGenotype())){
@@ -260,7 +260,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
                 "\nDied At= " + deadAt;
     }
 
-    public void saveAndExit() throws IOException {
+    protected void saveAndExit() throws IOException {
         try{
             FileWriter writer = new FileWriter("SimulationOutput" + this.stageNumber + ".txt");
             writer.write(this.statistics.getStatisticsOfAllTime());
@@ -273,12 +273,12 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         }
     }
 
-    public void exit() {
+    protected void exit() {
         this.stage.close();
         this.ended = true;
     }
 
-    public void pause() {
+    protected void pause() {
         this.paused = !this.paused;
     }
 }

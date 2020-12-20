@@ -20,7 +20,7 @@ public class Tile extends StackPane{
         this.setTranslateX(this.position.x*size+10);
         this.setTranslateY(this.position.y*size+10);
 
-        setOnMouseClicked(event -> vizualizerFX.engine.selectAnimal(this.position));
+        setOnMouseClicked(event -> vizualizerFX.selectAnimal(this.position));
     }
 
     public void setColor(Color color) {

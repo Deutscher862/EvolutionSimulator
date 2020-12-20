@@ -45,11 +45,11 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
     }
 
     //zwraca true, jeśli podany wektor jest w dżungli
-    public boolean inJungle(Vector2d position){
+    private boolean inJungle(Vector2d position){
         return position.precedes(this.jungleUpperRight) && position.follows(this.jungleLowerLeft);
     }
 
-    public ArrayList<ArrayList<Vector2d>> searchForFreeSpace(){
+    private ArrayList<ArrayList<Vector2d>> searchForFreeSpace(){
         //sprawdzanie, czy na mapie są puste miejsca na dodanie trawy
         //search[0] - savannahFreeSpace, search[1] - jungleFreeSpace
         Vector2d checkPosition;
