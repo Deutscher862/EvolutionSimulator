@@ -50,6 +50,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
     }
 
     public ArrayList<ArrayList<Vector2d>> searchForFreeSpace(){
+        //sprawdzanie, czy na mapie są puste miejsca na dodanie trawy
         //search[0] - savannahFreeSpace, search[1] - jungleFreeSpace
         Vector2d checkPosition;
         ArrayList<ArrayList<Vector2d> > freeSpace =
@@ -134,7 +135,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
                 Grass grass = mapOfGrass.get(currentGrassPosition);
                 List<Animal> list = this.mapOfAnimals.get(currentGrassPosition);
                 Animal strongestAnimal = list.get(0);
-                //counter liczy ilość zwierząt które zjedzą trawę
+                //counter liczy ilość najsilniejszych zwierząt które zjedzą trawę
                 int sameEnergyCounter = 1;
                 while (sameEnergyCounter < list.size() && list.get(sameEnergyCounter).getEnergy() == strongestAnimal.getEnergy())
                     sameEnergyCounter += 1;

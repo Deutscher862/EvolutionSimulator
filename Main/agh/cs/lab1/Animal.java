@@ -13,7 +13,7 @@ public class Animal {
     private final int moveEnergy;
     protected int deadAge = -1;
     //typ zwierzęcia - wykorzystywany podczas śledzenia jego historii
-    protected AnimalType type;
+    private AnimalType type;
     private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
     private int lifeLength = 0;
@@ -62,11 +62,20 @@ public class Animal {
         return deadAge;
     }
 
+    public void setDeadAge(int deadAge) {
+        this.deadAge = deadAge;
+    }
+
+    public void setType(AnimalType type){
+        this.type = type;
+    }
+
     public AnimalType getType() {
         return type;
     }
 
     public void move() {
+        //losuję gen obrotu
         int rotate = this.genes.randomDirection();
         for (int i = 0; i < rotate; i++){
             this.orientation = this.orientation.next();
@@ -79,8 +88,9 @@ public class Animal {
         this.energy -= this.moveEnergy;
         this.lifeLength += 1;
         this.map.positionChanged(oldPosition, this.position, this);
+
+        //gdy zwierzę umarło przekazuję informację o tym do obserwatorów i rodziców
         if(this.energy <= 0) {
-            //gdy zwierzę umarło przekazuję informację o tym do mapy, engine i wszystkich przodków
             informAboutDeath();
             if(this.firstParent != null)
                 this.firstParent.aliveChildren -= 1;
@@ -93,13 +103,18 @@ public class Animal {
         this.energy += grassEnergy;
     }
 
+    //silniejszemu rodzicowi przekazuję drugiego i pozycję do umieszczenia dziecka na mapie
     public Animal reproduce(Animal secondParent, Vector2d childPosition){
+        //rodzice tracą energię
         this.energy -= this.energy/4;
         secondParent.energy -= secondParent.energy/4;
+
+        //jeśli uruchomione jest śledzenie zwierząt, nowe zwierzęta oznaczane są jako dzieci lub potomkowie
         AnimalType childType;
         if(this.type == AnimalType.SELECTED || secondParent.type == AnimalType.SELECTED) childType = AnimalType.CHILD;
         else if(this.type == AnimalType.CHILD || secondParent.type == AnimalType.CHILD || this.type == AnimalType.DESCENDANT || secondParent.type == AnimalType.DESCENDANT)  childType = AnimalType.DESCENDANT;
         else childType = AnimalType.DEFAULT;
+
         Animal child = new Animal(this.map,(this.energy+secondParent.energy)/4, this.moveEnergy, this, secondParent, childPosition, childType);
         this.aliveChildren += 1;
         secondParent.aliveChildren += 1;
@@ -114,9 +129,5 @@ public class Animal {
         for(IEnergyRunOutObserver observer : this.observers){
             observer.EnergyRunOut(this);
         }
-    }
-
-    public void generateNewPosition() {
-        this.position = this.map.getLowerLeft().randomVector(this.map.getUpperRight());
     }
 }

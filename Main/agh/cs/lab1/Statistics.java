@@ -35,9 +35,9 @@ public class Statistics {
                 "\nPlants= " + this.map.getNumberOfGrass() +
                 "\nCurrent Strongest Genotype= " + currentStrongestGenotype +
                 "\nDead Animals= " + numberOfDeadAnimals +
-                "\nAverage Energy= \n" + averageEnergy +
-                "\nAverage Life Length= \n" + averageLifeLength +
-                "\nAverage Children Number= " + averageNumberOfChildren;
+                "\nAverage Energy= \n" + Math.round(averageEnergy) +
+                "\nAverage Life Length= \n" + Math.round(averageLifeLength) +
+                "\nAverage Children Number= " + Math.round(averageNumberOfChildren);
     }
 
     public int getAge() {
@@ -81,10 +81,14 @@ public class Statistics {
         this.totalAverageNumberOfAnimals += this.numberOfAnimals;
         this.totalAverageNumberOfGrass += this.map.getNumberOfGrass();
 
-        countAverageLifeLength();
+        //liczenie średniej długości życia
+        if (this.numberOfDeadAnimals > 0)
+            this.averageLifeLength = this.sumOfLifeLengths / this.numberOfDeadAnimals;
+        this.totalAverageLifeLength += this.averageLifeLength;
     }
 
     public void addToHashmap(Animal animal){
+        //hashmapa zawiera genotypy zwierząt mapy, na bieżąco aktualizowana podczas urodzin i śmierci zwierząt
         Genotype animalGenes = animal.getGenes();
         this.numberOfAnimals += 1;
         if (this.currentGenesMap.get(animalGenes) == null) this.currentGenesMap.put(animalGenes, 1);
@@ -101,6 +105,7 @@ public class Statistics {
     }
 
     public Map.Entry<Genotype, Integer> getFirstHashMapElement(Map<Genotype, Integer> hashMap){
+        //metoda zwraca sortuje hashmapę po ilości występowania genotypów i zwraca pierwszy element
         LinkedHashMap<Genotype, Integer> sortedGenes = hashMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
@@ -108,20 +113,15 @@ public class Statistics {
         return sortedGenes.entrySet().iterator().next();
     }
 
-    public void countAverageLifeLength() {
-        if (this.numberOfDeadAnimals > 0)
-            this.averageLifeLength = this.sumOfLifeLengths / this.numberOfDeadAnimals;
-        this.totalAverageLifeLength += this.averageLifeLength;
-    }
-
     public String getStatisticsOfAllTime(){
+        //metoda zwracająca ogólne statysyki liczone od początku symulacji
         Map.Entry<Genotype, Integer> entry = getFirstHashMapElement(this.strongestGenesOfAllTime);
         return "General Statistics: "+
                 "\nAverage Animals Number= " + this.totalAverageNumberOfAnimals/this.age +
                 "\nAverage Grass Number= " + this.totalAverageNumberOfGrass/this.age +
                 "\nStrongest Genotype= " + entry.getKey() +
-                "\nAverage Animal Energy= " + this.totalSumOfAverageEnergy/this.age +
+                "\nAverage Animal Energy= " + Math.round(this.totalSumOfAverageEnergy/this.age) +
                 "\nAverage Animal Life Length= " + this.totalAverageLifeLength/this.age +
-                "\nAverage Children Number= " + this.totalAverageChildrenAmount/this.age;
+                "\nAverage Children Number= " + Math.round(this.totalAverageChildrenAmount/this.age);
     }
 }

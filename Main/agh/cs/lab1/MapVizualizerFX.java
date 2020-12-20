@@ -129,19 +129,27 @@ public class MapVizualizerFX {
         this.root.getChildren().add(exit);
     }
 
+    public void setTileColor(Vector2d position, Color color){
+        this.grid[position.x][position.y].setColor(color);
+    }
+
+    public Pane getRoot() {
+        return root;
+    }
+
     public void drawScene(){
         //pętla kolorująca płytki
         for(int i = 0; i < this.size.x; i++){
             for(int j = 0; j < this.size.y; j++){
                 Vector2d position = new Vector2d(i, j);
                 Object object = this.map.objectAt(position);
-                this.grid[i][j].setColor(Color.LIGHTGREEN);
+                setTileColor(position, Color.LIGHTGREEN);
                 if(object instanceof Animal)
                     if (object.equals(this.engine.getSelectedAnimal()) && this.engine.getSelectedAnimal().getType() == AnimalType.SELECTED)
-                        this.grid[i][j].setColor(Color.MAGENTA);
+                        setTileColor(position, Color.MAGENTA);
                     else fillAnimalTile((Animal) object);
                 else if(object instanceof Grass)
-                    this.grid[i][j].setColor(Color.GREEN);
+                    setTileColor(position, Color.GREEN);
             }
         }
         //aktualizowanie wyświetlanych statystyk
@@ -152,7 +160,8 @@ public class MapVizualizerFX {
         if(showGeneralStatistics){
             this.generalStatistics.setText(this.engine.getGeneralStatistics());
         }
-        if(this.engine.getAge() == this.engine.getAgeFollowNumber()) this.animalStatistics.setText(this.engine.countSelectedAnimalStatistics());
+        if(this.engine.getAge() == this.engine.getAgeFollowNumber())
+            this.animalStatistics.setText(this.engine.countSelectedAnimalStatistics());
     }
 
     public void fillAnimalTile(Animal animal){
@@ -161,15 +170,11 @@ public class MapVizualizerFX {
         int animalStartEnergy = animal.getStartEnergy();
         int animalEnergy = animal.getEnergy();
         if (animalEnergy >= animalStartEnergy*3/4)
-            grid[position.x][position.y].setColor(Color.BLACK);
+            setTileColor(position, Color.BLACK);
         else if(animalEnergy >= animalStartEnergy/2)
-            grid[position.x][position.y].setColor(Color.BROWN);
+            setTileColor(position, Color.BROWN);
         else if(animalEnergy >= animalStartEnergy/4)
-            grid[position.x][position.y].setColor(Color.GRAY);
-        else grid[position.x][position.y].setColor(Color.LIGHTGRAY);
-    }
-
-    public Pane getRoot() {
-        return root;
+            setTileColor(position, Color.GRAY);
+        else setTileColor(position, Color.LIGHTGRAY);
     }
 }

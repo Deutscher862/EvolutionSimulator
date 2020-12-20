@@ -6,9 +6,10 @@ import java.util.Random;
 public class Genotype {
     private final Random rand  = new Random();
     private final int[] genes = new int[32];
-    private int[] directions = {0, 0, 0, 0, 0, 0, 0, 0};
+    private final int[] directions = {0, 0, 0, 0, 0, 0, 0, 0};
 
     public Genotype(){
+        //konstruktor genotypu dla pierwszych zwierząt na mapie
         for(int i = 0; i < 32; i++) {
             this.genes[i] = rand.nextInt(8);
             this.directions[this.genes[i]] += 1;
@@ -17,6 +18,7 @@ public class Genotype {
     }
 
     public Genotype(Genotype strongerGenes, Genotype weakerGenes){
+        //konstruktor dla zwierząt powstałych po rozmnożeniu
         crossGenes(strongerGenes.getGenes(), weakerGenes.getGenes());
     }
 
@@ -34,6 +36,7 @@ public class Genotype {
 
     @Override
     public boolean equals(Object o) {
+        //metoda equals zmieniona na potrzeby hashowania genów w statystykach
         if(o instanceof Genotype){
             return Arrays.equals(this.genes, ((Genotype) o).genes);
         }
@@ -45,6 +48,7 @@ public class Genotype {
         return Arrays.hashCode(genes);
     }
 
+    //losowanie genu w celu określenia obrotu zwierzęcia
     protected int randomDirection(){
         return this.genes[rand.nextInt(32)];
     }
@@ -73,7 +77,7 @@ public class Genotype {
     }
 
     private void validate(){
-        //szukam czy istnieje brakujący kierunek, jeśli tak to aktualizuję tablicę genów
+        //szukam czy w genach istnieje brakujący kierunek, jeśli tak to aktualizuję tablicę genów
         for (int i = 0; i < 8; i++){
             if (this.directions[i] == 0){
                 updateDirections(i);

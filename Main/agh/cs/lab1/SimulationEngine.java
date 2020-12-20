@@ -1,16 +1,5 @@
 package agh.cs.lab1;
 
-/*
-W konstruktorze pojawia się pierwsza trawa
-Następuje pętla, a w niej:
-1.Wszystkie zwierzęta ruszają się i tracą energię
-2.Następuje przejście po całej mapie:
-    - sprawdzenie czy jakieś zwierzę umarło - jest usuwane z listy i hashmapy
-    - sprawdzenie czy jakaś trawa i zwierzę jest na jednym polu - jeśli tak to trawa jest usuwana z hashmapy i zwierze odzyskuje energię
-    - sprawdzenie czy kilka zwierząt nie stoi na jednej pozycji i czy mogą się rozmnażać - następuje stworzenie nowego zwierzęta
-3. Rośnie nowa trawa
- */
-
 import javafx.scene.Scene;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.paint.Color;
@@ -28,7 +17,6 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     private final ArrayList<Animal> listOfAnimals = new ArrayList<>();
     private final ArrayList<Animal> animalsToRemove = new ArrayList<>();
     private final Random rand = new Random();
-    private int age = 0;
     private final MapVizualizerFX vizualizer;
     private final float appMapSize = 800;
     private final int appStatsSize = 500;
@@ -46,10 +34,11 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         int torusMapSize = (size.x)*(size.y);
         if (numberOfAnimals > torusMapSize) numberOfAnimals = torusMapSize;
 
+        //pętla dodająca pierwsze zwierzęta na mapę
         for (int i = 0; i < numberOfAnimals; i++){
             Vector2d lowerLeft = new Vector2d(0, 0);
             Vector2d newPosition = lowerLeft.randomVector(size);
-            // jeśli pozycja na mapie jest już zajęta, generuje mu nowy wektor
+            // jeśli pozycja na mapie jest już zajęta, generuje nowy wektor
             while(this.map.isOccupied(newPosition))
                 newPosition = lowerLeft.randomVector(size);
             Animal newAnimal = new Animal(this.map, startEnergy, moveEnergy, null, null, newPosition, AnimalType.DEFAULT);
@@ -58,6 +47,8 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
             this.listOfAnimals.add(newAnimal);
             this.statistics.addToHashmap(newAnimal);
         }
+
+        //tworzenie wizualizacji
         int tileSize;
         if(size.x < size.y){
             tileSize = (int) Math.floor(appMapSize / size.y);
@@ -69,11 +60,29 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         stage.show();
     }
 
+    public Animal getSelectedAnimal() {
+        return selectedAnimal;
+    }
+
+    public int getAgeFollowNumber() {
+        return ageFollowNumber;
+    }
+
+    public int getAge() { return this.statistics.getAge();}
+
+    public String getCurrentStatistics(){
+        return this.statistics.toString();
+    }
+
+    public String getGeneralStatistics(){
+        return this.statistics.getStatisticsOfAllTime();
+    }
+
     @Override
     public void run() {
+        //główna pętla obsługująca symulację
         new Thread (() ->{
-            while(!this.paused && !this.ended) {
-                this.age += 1;
+            while(!this.ended) {
                 newDay();
                 try {
                     Thread.sleep(100);
@@ -88,8 +97,8 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
     }
 
     private void newDay(){
+        //wszystkie następujące po sobie wydarzenia na mapie
         this.map.growGrass();
-        //poruszam zwierzętami z mapy
         for(Animal currentAnimal : this.listOfAnimals){
             currentAnimal.move();
         }
@@ -104,6 +113,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         ArrayList<Animal> childrenToPlace = new ArrayList<>();
         for (Map.Entry<Vector2d, List<Animal>> vector2dListEntry : this.map.getMapOfAnimals().entrySet()) {
             List<Animal> currentList = vector2dListEntry.getValue();
+            //wybieram tylko pola na których są conajmniej 2 zwierzęta
             if (currentList.size() >= 2) {
                 Animal strongerParent;
                 Animal weakerParent;
@@ -136,27 +146,29 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
                     for (int i = 0; i < 8; i++) {
                         nearestPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(this.map.getUpperRight());
                         if (!this.map.isOccupied(nearestPosition)) {
+                            //wszystkie sąsiednie puste pola dodaję do listy
                             freeSpace.add(nearestPosition);
                         }
                         lookForFreeSpace = lookForFreeSpace.next();
                     }
-                    //jeśli istnieje jakieś puste miejsce, to je losuję i dodaję do metody reproduce
+                    //jeśli lista wolnych miejsc nie jest pusta, losuję z niej pozycję
                     Vector2d childPosition;
                     if (freeSpace.size() > 0)
                         childPosition = freeSpace.get(rand.nextInt(freeSpace.size()));
-                        //jeśli nie, to losuje zajęte miejsce
+                    //jeśli nie, to losuje zajęte miejsce
                     else {
                         int spin = rand.nextInt(8);
                         for (int i = 0; i < spin; i++)
                             lookForFreeSpace = lookForFreeSpace.next();
                         childPosition = strongerParent.getPosition().add(lookForFreeSpace.toUnitVector()).getBackToMap(this.map.getUpperRight());
                     }
+                    //tworzę nowe dziecko, przekazując mu rodziców i pozycję na mapie
                     Animal child = strongerParent.reproduce(weakerParent, childPosition);
                     childrenToPlace.add(child);
                 }
             }
         }
-        //gdy wszystkie dzieci zostają stworzone, dodaję je do mapy
+        //gdy wszystkie dzieci zostają stworzone, dodaję je do mapy i statystyk
         for(Animal child : childrenToPlace) {
             this.map.place(child);
             child.addObserver(this);
@@ -167,7 +179,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
 
     @Override
     public void EnergyRunOut(Animal animal) {
-        animal.deadAge = this.statistics.getAge();
+        animal.setDeadAge(this.statistics.getAge());
         this.animalsToRemove.add(animal);
     }
 
@@ -181,19 +193,8 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         this.animalsToRemove.clear();
     }
 
-    public Animal getSelectedAnimal() {
-        return selectedAnimal;
-    }
-
-    public int getAgeFollowNumber() {
-        return ageFollowNumber;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
     public void followAnimal(){
+        //metoda rozpoczynąjąca proces śledzenia historii zwierzęcia
         TextInputDialog dialog = new TextInputDialog("100");
         dialog.setTitle("Age Number Dialog");
         dialog.setHeaderText("Enter a number of ages to follow the animal");
@@ -202,20 +203,22 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         //zapisuje epoke do której śledzić zwierzę
         result.ifPresent(age -> this.ageFollowNumber = Integer.parseInt(age) + this.statistics.getAge());
 
-        //ustawiam wszystkie zwierzęta na default
+        //ustawiam wszystkie typ wszystkich zwierząt na default,
         for(Animal animal : this.listOfAnimals){
-            animal.type = AnimalType.DEFAULT;
+            animal.setType(AnimalType.DEFAULT);
         }
         this.paused = false;
-        this.selectedAnimal.type = AnimalType.SELECTED;
+        this.selectedAnimal.setType(AnimalType.SELECTED);
         this.vizualizer.followAnimal.setVisible(false);
     }
 
     public void selectAnimal(Vector2d position) {
+        //metoda uruchamiana w momencie kliknięcia na konkretne zwierzę w wizualizacji
         Object animal = this.map.objectAt(position);
         if(this.paused && animal instanceof Animal){
             if(this.selectedAnimal != null)
                 this.vizualizer.fillAnimalTile(this.selectedAnimal);
+            //po wybraniu zwierzęcia przycisk śledzenia staje się widoczny
             this.vizualizer.followAnimal.setVisible(true);
             this.selectedAnimal = (Animal) animal;
             this.vizualizer.grid[position.x][position.y].setColor(Color.MAGENTA);
@@ -228,7 +231,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         for(Animal animal : this.listOfAnimals){
             if(animal.getGenes().equals(this.statistics.getCurrentStrongestGenotype())){
                 Vector2d position = animal.getPosition();
-                this.vizualizer.grid[position.x][position.y].setColor(Color.YELLOW);
+                this.vizualizer.setTileColor(position, Color.YELLOW);
             }
         }
     }
@@ -248,7 +251,6 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
             }
             else if (animal.getType() == AnimalType.DESCENDANT) countDescendants += 1;
         }
-        this.selectedAnimal.type = AnimalType.DEFAULT;
         this.paused = true;
 
         return "Statistics After Following:" +
@@ -256,14 +258,6 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
                 "\nAlive Children= " + countChildren +
                 "\nAlive Descendants= " + countDescendants +
                 "\nDied At= " + deadAt;
-    }
-
-    public String getCurrentStatistics(){
-        return this.statistics.toString();
-    }
-
-    public String getGeneralStatistics(){
-        return this.statistics.getStatisticsOfAllTime();
     }
 
     public void saveAndExit() throws IOException {
