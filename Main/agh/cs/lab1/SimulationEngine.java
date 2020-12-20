@@ -193,7 +193,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         this.animalsToRemove.clear();
     }
 
-    protected void followAnimal(){
+    public void followAnimal(){
         //metoda rozpoczynąjąca proces śledzenia historii zwierzęcia
         TextInputDialog dialog = new TextInputDialog("100");
         dialog.setTitle("Age Number Dialog");
@@ -212,7 +212,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         this.vizualizer.setFollowAnimalVisibility();
     }
 
-    protected void selectAnimal(Vector2d position) {
+    public void selectAnimal(Vector2d position) {
         //metoda uruchamiana w momencie kliknięcia na konkretne zwierzę w wizualizacji
         Object animal = this.map.objectAt(position);
         if(this.paused && animal instanceof Animal){
@@ -226,7 +226,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         }
     }
 
-    protected void selectStrongestGenes(){
+    public void selectStrongestGenes(){
         //metoda szukająca zwierząt o najsilniejszym genotypie
         for(Animal animal : this.listOfAnimals){
             if(animal.getGenes().equals(this.statistics.getCurrentStrongestGenotype())){
@@ -260,7 +260,7 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
                 "\nDied At= " + deadAt;
     }
 
-    protected void saveAndExit() throws IOException {
+    public void saveAndExit() throws IOException {
         try{
             FileWriter writer = new FileWriter("SimulationOutput" + this.stageNumber + ".txt");
             writer.write(this.statistics.getStatisticsOfAllTime());
@@ -273,12 +273,12 @@ public class SimulationEngine implements IEngine, IEnergyRunOutObserver {
         }
     }
 
-    protected void exit() {
+    public void exit() {
         this.stage.close();
         this.ended = true;
     }
 
-    protected void pause() {
+    public void pause() {
         this.paused = !this.paused;
     }
 }

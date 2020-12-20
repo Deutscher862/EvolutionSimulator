@@ -104,7 +104,7 @@ public class Statistics {
         if(this.currentGenesMap.get(animalGenes) == 0) this.currentGenesMap.remove(animalGenes);
     }
 
-    public Map.Entry<Genotype, Integer> getFirstHashMapElement(Map<Genotype, Integer> hashMap){
+    private Map.Entry<Genotype, Integer> getFirstHashMapElement(Map<Genotype, Integer> hashMap){
         //metoda zwraca sortuje hashmapę po ilości występowania genotypów i zwraca pierwszy element
         LinkedHashMap<Genotype, Integer> sortedGenes = hashMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
