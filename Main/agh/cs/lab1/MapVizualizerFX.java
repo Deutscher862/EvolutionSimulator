@@ -13,31 +13,48 @@ public class MapVizualizerFX {
     private final Button followAnimal;
     private final SimulationEngine engine;
     private final Pane root;
-    private final Vector2d size;
+    private final Vector2d mapSize;
     private final TorusMap map;
     private final Button startStopButton;
     private Text animalStatistics;
     private Text mapStatistics;
     private Text generalStatistics;
+    private Text mapSizeWarning;
     private boolean showGeneralStatistics = false;
 
-    public MapVizualizerFX(TorusMap map, int tileSize, Vector2d size, SimulationEngine engine) {
+    public MapVizualizerFX(TorusMap map, int tileSize, Vector2d mapSize, SimulationEngine engine) {
         this.root = new Pane();
-        this.size = size;
+        this.mapSize = mapSize;
         this.map = map;
-        this.grid = new Tile[size.x][size.y];
         this.engine = engine;
 
-        //tworzę siatkę do wyświetlania pól
-        for(int x = 0; x < this.size.x; x++){
-            for( int y = 0; y < this.size.y; y++){
-                Tile tile;
-                if (this.map.objectAt(new Vector2d(x, y)) instanceof Animal)
-                    this.grid[x][y] = new Tile(tileSize, new Vector2d(x, y), Color.BLACK, this);
-                else this.grid[x][y] = new Tile(tileSize, new Vector2d(x, y), Color.LIGHTGREEN, this);
-                this.root.getChildren().add(this.grid[x][y]);
+        //nie wyświetlam mapy, jeśli jej rozmiar jest za duży
+        if(mapSize.x > 50 || mapSize.y > 50) {
+            this.grid = null;
+            this.mapSizeWarning = new Text();
+            this.mapSizeWarning.setText("Map size to large, displaying only statistics");
+            this.mapSizeWarning.setFont(Font.font("Verdana", 15));
+            this.mapSizeWarning.setTranslateX(100);
+            this.mapSizeWarning.setTranslateY(400);
+            this.root.getChildren().add(this.mapSizeWarning);
+        }
+        else {
+            this.grid = new Tile[mapSize.x][mapSize.y];
+            this.mapSizeWarning = null;
+
+            //tworzę siatkę do wyświetlania pól
+            for (int x = 0; x < this.mapSize.x; x++) {
+                for (int y = 0; y < this.mapSize.y; y++) {
+                    Tile tile;
+                    if (this.map.objectAt(new Vector2d(x, y)) instanceof Animal)
+                        this.grid[x][y] = new Tile(tileSize, new Vector2d(x, y), Color.BLACK, this);
+                    else this.grid[x][y] = new Tile(tileSize, new Vector2d(x, y), Color.LIGHTGREEN, this);
+                    this.root.getChildren().add(this.grid[x][y]);
+                }
             }
         }
+
+
         //aktualne statystyki mapy
         this.mapStatistics = new Text();
         this.mapStatistics.setWrappingWidth(200);
@@ -71,21 +88,26 @@ public class MapVizualizerFX {
         this.root.getChildren().add(this.startStopButton);
 
         //przycisk śledzenia zwierzęcia
-        this.followAnimal = new Button("Follow selected animal");
-        this.followAnimal.setTranslateX(970);
-        this.followAnimal.setTranslateY(680);
-        this.followAnimal.setMinSize(100, 50);
-        this.followAnimal.setVisible(false);
-        this.followAnimal.setOnAction(event -> engine.followAnimal());
-        this.root.getChildren().add(followAnimal);
+        if(this.grid != null){
+            this.followAnimal = new Button("Follow selected animal");
+            this.followAnimal.setTranslateX(970);
+            this.followAnimal.setTranslateY(680);
+            this.followAnimal.setMinSize(100, 50);
+            this.followAnimal.setVisible(false);
+            this.followAnimal.setOnAction(event -> engine.followAnimal());
+            this.root.getChildren().add(followAnimal);
+        }
+        else this.followAnimal = null;
 
         //przycisk wyświetlenia najsilniejszych zwierząt
-        Button selectStrongestGenotypeAnimals = new Button("Show strongest animals");
-        selectStrongestGenotypeAnimals.setTranslateX(820);
-        selectStrongestGenotypeAnimals.setTranslateY(680);
-        selectStrongestGenotypeAnimals.setMinSize(100, 50);
-        selectStrongestGenotypeAnimals.setOnAction(event ->this.engine.selectStrongestGenes());
-        this.root.getChildren().add(selectStrongestGenotypeAnimals);
+        if(this.grid != null) {
+            Button selectStrongestGenotypeAnimals = new Button("Show strongest animals");
+            selectStrongestGenotypeAnimals.setTranslateX(820);
+            selectStrongestGenotypeAnimals.setTranslateY(680);
+            selectStrongestGenotypeAnimals.setMinSize(100, 50);
+            selectStrongestGenotypeAnimals.setOnAction(event -> this.engine.selectStrongestGenes());
+            this.root.getChildren().add(selectStrongestGenotypeAnimals);
+        }
 
         //przycisk do wyświetlania ogólnych statystyk
         Button showGeneralStatistics = new Button("Show general statistics");
@@ -145,23 +167,30 @@ public class MapVizualizerFX {
         return root;
     }
 
+    public Tile[][] getGrid() {
+        return grid;
+    }
+
     public void drawScene(){
         //pętla kolorująca płytki
-        for(int i = 0; i < this.size.x; i++){
-            for(int j = 0; j < this.size.y; j++){
-                Vector2d position = new Vector2d(i, j);
-                Object object = this.map.objectAt(position);
-                setTileColor(position, Color.LIGHTGREEN);
-                if(object instanceof Animal)
-                    if (object.equals(this.engine.getSelectedAnimal()) && this.engine.getSelectedAnimal().getType() == AnimalType.SELECTED)
-                        setTileColor(position, Color.MAGENTA);
-                    else fillAnimalTile((Animal) object);
-                else if(object instanceof Grass)
-                    setTileColor(position, Color.GREEN);
+        if(this.grid != null) {
+            for (int i = 0; i < this.mapSize.x; i++) {
+                for (int j = 0; j < this.mapSize.y; j++) {
+                    Vector2d position = new Vector2d(i, j);
+                    Object object = this.map.objectAt(position);
+                    setTileColor(position, Color.LIGHTGREEN);
+                    if (object instanceof Animal)
+                        if (object.equals(this.engine.getSelectedAnimal()) && this.engine.getSelectedAnimal().getType() == AnimalType.SELECTED)
+                            setTileColor(position, Color.MAGENTA);
+                        else fillAnimalTile((Animal) object);
+                    else if (object instanceof Grass)
+                        setTileColor(position, Color.GREEN);
+                }
             }
         }
         //aktualizowanie wyświetlanych statystyk
-        this.followAnimal.setVisible(false);
+        if(this.followAnimal != null)
+            this.followAnimal.setVisible(false);
         this.mapStatistics.setText(this.engine.getCurrentStatistics());
         if(this.engine.getSelectedAnimal() == null || this.engine.getSelectedAnimal().getType() != AnimalType.SELECTED)
             this.animalStatistics.setText("No animal is being followed");
@@ -186,7 +215,8 @@ public class MapVizualizerFX {
         else setTileColor(position, Color.LIGHTGRAY);
     }
 
-    public void selectAnimal(Vector2d position) {
+    public void animalSelected(Vector2d position) {
+        //przekazanie do engine informacji i wskazaniu zwierzęcia
         this.engine.selectAnimal(position);
     }
 }

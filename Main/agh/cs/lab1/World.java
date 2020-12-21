@@ -26,7 +26,9 @@ public class World extends Application {
             int numberOfSimulations = Integer.parseInt(inputData.get("numberOfSimulations").toString());
             int numberOfAges = Integer.parseInt(inputData.get("numberOfAges").toString());
             int refreshTime = Integer.parseInt(inputData.get("refreshTime").toString());
-            if(numberOfAnimals < 0 || startEnergy <=0 || moveEnergy <= 0 || grassEnergy <= 0 || mapSize.x <=0 || mapSize.y<=0 || jungleRatio < 0 || numberOfSimulations <0 || numberOfAges < 0)
+
+            //walidacja danych
+            if(numberOfAnimals < 0 || startEnergy <=0 || moveEnergy <= 0 || grassEnergy <= 0 || mapSize.x <=0 || mapSize.y<=0 || jungleRatio < 0 || numberOfSimulations <0 || numberOfAges < 0 || numberOfSimulations > 2)
                 throw new IllegalArgumentException("Incorrect initial data");
 
             //uruchamianie symulacji

@@ -21,6 +21,7 @@ public class Animal {
     private int energy;
 
     public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position, AnimalType type){
+        //konstruktor łączony dla zwierząt początkowych i tych powstałych podczas rozmnażania
         this.map = map;
         this.firstParent = firstParent;
         this.secondParent = secondParent;
@@ -92,6 +93,7 @@ public class Animal {
         //gdy zwierzę umarło przekazuję informację o tym do obserwatorów i rodziców
         if(this.energy <= 0) {
             informAboutDeath();
+            removeObservers();
             if(this.firstParent != null)
                 this.firstParent.aliveChildren -= 1;
             if(this.secondParent != null)
@@ -123,6 +125,10 @@ public class Animal {
 
     public void addObserver(IEnergyRunOutObserver observer){
         this.observers.add(observer);
+    }
+
+    private void removeObservers(){
+        this.observers.clear();
     }
 
     private void informAboutDeath(){

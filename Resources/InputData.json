@@ -1,11 +1,12 @@
 {
-    "width": "20",
-    "height": "20",
+    "_comment": "przy zbyt dużych rozmiarach mapy wizualizacja nie nadąża z wyświetlaniem i pojawiają się błędy",
+    "width": "50",
+    "height": "50",
     "startEnergy": "30",
     "moveEnergy": "1",
     "plantEnergy": "10",
     "jungleRatio": "0.3",
-    "numberOfAnimals": "10",
+    "numberOfAnimals": "100",
     "numberOfSimulations": "1",
     "numberOfAges": "1000",
     "refreshTime": "100"

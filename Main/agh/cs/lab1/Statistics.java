@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 public class Statistics {
     private final TorusMap map;
     private int age = 0 ;
+    private final int lastAge;
     private float totalSumOfAverageEnergy = 0;
     private int totalAverageNumberOfAnimals = 0;
     private int totalAverageNumberOfGrass = 0;
@@ -23,14 +24,16 @@ public class Statistics {
     private Genotype currentStrongestGenotype;
     private int strongestGenotypeAmount = 0;
 
-    public Statistics(TorusMap map) {
+    public Statistics(TorusMap map, int lastAge) {
         this.map = map;
+        this.lastAge = lastAge;
     }
 
     @Override
     public String toString() {
         return "Current Statistics:" +
                 "\nAge= " + age +
+                "\nLast Age= " + lastAge +
                 "\nAlive Animals= " + numberOfAnimals +
                 "\nPlants= " + this.map.getNumberOfGrass() +
                 "\nCurrent Strongest Genotype= " + currentStrongestGenotype +
