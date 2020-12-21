@@ -1,7 +1,7 @@
 {
     "_comment": "przy zbyt dużych rozmiarach mapy wizualizacja nie nadąża z wyświetlaniem i pojawiają się błędy",
-    "width": "50",
-    "height": "50",
+    "width": "40",
+    "height": "40",
     "startEnergy": "30",
     "moveEnergy": "1",
     "plantEnergy": "10",
