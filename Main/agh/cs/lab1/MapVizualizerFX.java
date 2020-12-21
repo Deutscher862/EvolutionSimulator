@@ -54,7 +54,6 @@ public class MapVizualizerFX {
             }
         }
 
-
         //aktualne statystyki mapy
         this.mapStatistics = new Text();
         this.mapStatistics.setWrappingWidth(200);

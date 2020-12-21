@@ -11,6 +11,7 @@ public class Animal {
     private final Animal secondParent;
     private final int startEnergy;
     private final int moveEnergy;
+    private int energy;
     private int deadAge = -1;
     //typ zwierzęcia - wykorzystywany podczas śledzenia jego historii
     private AnimalType type;
@@ -18,7 +19,6 @@ public class Animal {
     private Vector2d position;
     private int lifeLength = 0;
     private int aliveChildren = 0;
-    private int energy;
 
     public Animal(TorusMap map, int startEnergy, int moveEnergy, Animal firstParent, Animal secondParent, Vector2d position, AnimalType type){
         //konstruktor łączony dla zwierząt początkowych i tych powstałych podczas rozmnażania
@@ -67,12 +67,12 @@ public class Animal {
         this.deadAge = deadAge;
     }
 
-    public void setType(AnimalType type){
-        this.type = type;
-    }
-
     public AnimalType getType() {
         return type;
+    }
+
+    public void setType(AnimalType type){
+        this.type = type;
     }
 
     public void move() {

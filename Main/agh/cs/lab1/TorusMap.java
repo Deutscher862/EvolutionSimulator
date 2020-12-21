@@ -51,7 +51,7 @@ public class TorusMap implements IWorldMap, IPositionChangeObserver, IEnergyRunO
 
     private ArrayList<ArrayList<Vector2d>> searchForFreeSpace(){
         //sprawdzanie, czy na mapie są puste miejsca na dodanie trawy
-        //search[0] - savannahFreeSpace, search[1] - jungleFreeSpace
+        //freeSpace[0] - savannahFreeSpace, freeSpace[1] - jungleFreeSpace
         Vector2d checkPosition;
         ArrayList<ArrayList<Vector2d> > freeSpace =
                 new ArrayList<>(2);
