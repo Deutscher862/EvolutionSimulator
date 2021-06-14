@@ -1,12 +1,5 @@
 package agh.cs.lab1;
 
-/**
- * The interface responsible for managing the moves of the animals.
- * Assumes that Vector2d and MoveDirection classes are defined.
- *
- * @author apohllo
- *
- */
 public interface IEngine {
     /**
      * Move the animal on the map according to the provided move directions. Every
